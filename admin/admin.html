@@ -3,50 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>admin page</title>
+    <title>Admin Dashboard - Gaming</title>
     <link rel="stylesheet" href="../style.css">
     <style>
-        .live-clock-box {
-            background: white;
-            color: #333;
-            padding: 15px 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0b0e14;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 95vh;
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: 800;
+            color: #00f0ff;
+            text-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+            margin-bottom: 25px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        /* صندوق الساعة واليوم بطابع الجيمينج */
+        .gaming-clock-box {
+            background: #151921;
+            border: 2px solid #00f0ff;
+            border-radius: 16px;
+            padding: 25px 35px;
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.2);
+            margin-bottom: 30px;
             text-align: center;
             width: 100%;
-            max-width: 400px;
+            max-width: 550px;
+            box-sizing: border-box;
         }
-        .live-clock-box h3 {
-            margin: 0 0 8px 0;
-            color: #2980b9;
+
+        .gaming-clock-box h3 {
+            margin: 0 0 10px 0;
+            color: #a0aabe;
             font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
-        .live-clock-box p {
-            margin: 5px 0;
-            font-size: 15px;
+
+        .day-date {
+            font-size: 22px;
+            font-weight: 600;
+            color: #ff007f;
+            text-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .clock-display {
+            font-size: 36px;
+            font-weight: 900;
+            color: #00ff66;
+            text-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
+            letter-spacing: 2px;
+            font-family: monospace;
+        }
+
+        /* الكارت الرئيسي للأزرار */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 550px;
+            background: #151921;
+            padding: 35px;
+            border-radius: 16px;
+            border: 1px solid #2a2f3d;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            font-size: 20px;
+            font-weight: 800;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-management {
+            background: linear-gradient(45deg, #00b4db, #0083b0);
+            box-shadow: 0 0 15px rgba(0, 180, 219, 0.4);
+        }
+
+        .btn-time {
+            background: linear-gradient(45deg, #7928ca, #ff0080);
+            box-shadow: 0 0 15px rgba(255, 0, 128, 0.4);
+        }
+
+        .btn-profile {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            box-shadow: 0 0 15px rgba(56, 239, 125, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-3px) scale(1.02);
+            filter: brightness(1.2);
+        }
+
+        button:active {
+            transform: translateY(1px);
         }
     </style>
 </head>
 <body>
     <p class="title" id="welcomeText">جاري التحميل...</p>
 
-    <div class="live-clock-box">
-        <h3>الوقت الحالي</h3>
-        <p id="liveClock">--:--:-- --</p>
+    <div class="gaming-clock-box">
+        <h3>الوقت والتاريخ الحالي</h3>
+        <div class="day-date" id="currentDayDate">جاري التحديد...</div>
+        <div class="clock-display" id="liveClock">00:00:00 --</div>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 400px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
-        <form action="managment.html" method="get">
-            <button type="submit" style="width: 100%;">إدارة الحجوزات</button>
+    <div class="main-container">
+        <form action="management.html" method="get">
+            <button type="submit" class="btn-management">إدارة الحجوزات</button>
         </form>
         
         <form action="time.html" method="get">
-            <button type="submit" style="width: 100%; background-color: #2980b9;">مواعيد حجوزات</button>
+            <button type="submit" class="btn-time">مواعيد حجوزات</button>
         </form>
         
         <form action="profile.html" method="get">
-            <button type="submit" style="width: 100%; background-color: #8e44ad;">profile</button>
+            <button type="submit" class="btn-profile">Profile</button>
         </form>
     </div>
 
@@ -70,23 +165,30 @@
         document.addEventListener("DOMContentLoaded", async () => {
             const welcomeText = document.getElementById("welcomeText");
             const liveClockElement = document.getElementById("liveClock");
+            const dayDateElement = document.getElementById("currentDayDate");
 
-            // 1. تشغيل الساعة الحية (ساعات، دقائق، ثواني مع AM/PM)
-            function updateClock() {
+            // 1. تشغيل الساعة واليوم والتاريخ
+            function updateClockAndDate() {
                 const now = new Date();
+                
+                // عرض اليوم والتاريخ باللغة العربية
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                dayDateElement.textContent = now.toLocaleDateString('ar-EG', options);
+
+                // عرض الوقت (ساعات، دقائق، ثواني)
                 let hours = now.getHours();
                 const minutes = String(now.getMinutes()).padStart(2, '0');
                 const seconds = String(now.getSeconds()).padStart(2, '0');
                 const ampm = hours >= 12 ? 'PM' : 'AM';
                 
                 hours = hours % 12;
-                hours = hours ? hours : 12; // الساعة 0 تصبح 12
+                hours = hours ? hours : 12;
                 const formattedHours = String(hours).padStart(2, '0');
 
                 liveClockElement.textContent = `${formattedHours}:${minutes}:${seconds} ${ampm}`;
             }
-            setInterval(updateClock, 1000);
-            updateClock();
+            setInterval(updateClockAndDate, 1000);
+            updateClockAndDate();
 
             // 2. جلب الترحيب بالأدمن من قاعدة البيانات
             try {

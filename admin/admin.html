@@ -117,23 +117,7 @@
                 const reservationsSnapshot = await db.collection("reservations").get();
                 let activeBookingFound = false;
 
-                reservationsSnapshot.forEach(doc => {
-                    const resData = doc.data();
-                    // لو الحجز مقبول، يمكنك مقارنة الوقت هنا أو عرض الحجوزات النشطة اليوم
-                    if (resData.status === "مقبول") {
-                        // كمثال: نعرض تفاصيل الحجز الحالي المسجل
-                        // يمكنك مطابقة الوقت الحالي مع نطاق الساعات لو حبيت
-                        activeBookingFound = true;
-                        currentBookingElement.innerHTML = `الحجز الحالي: <b style="color: #c0392b;">${resData.time || resData.details}</b><br>بواسطة: <b>${resData.name}</b> (${resData.phone})`;
-                    }
-                });
-
-         
-                }
-
-            } catch (error) {
-                console.error("خطأ في جلب حالة الحجز الحالي:", error);
-                currentBookingElement.textContent = "تعذر جلب حالة الحجز الحالي.";
+            
             }
         });
     </script>

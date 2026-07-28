@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحة المستخدم - Control Portal</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: #2b3a4a;
+            color: #c5c6c7;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .dashboard-card {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 30px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            color: #333;
+        }
+
+        .welcome-title {
+            color: #1f2833;
+            font-weight: 900;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background-color: #fff3e6;
+            border: 1px solid #ffe0b2;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 12px;
+            font-size: 15px;
+            color: #e65100;
+            font-weight: bold;
+        }
+
+        .booking-box {
+            background-color: #f0f7ff;
+            border: 1px solid #bae0ff;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #003eb3;
+            line-height: 1.6;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            background: #389e0d;
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .btn-primary { background: #1890ff; }
+        .btn-warning { background: #fa8c16; }
+        .btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-card">
+        <h2 id="userNameDisplay" class="welcome-title">أهلاً بك</h2>
+
+        <div class="info-box">
+            ⏰ الوقت: <span id="currentTime">--:--:--</span>
+        </div>
+
+        <div class="booking-box">
+            📅 تاريخ اليوم: <span id="currentDate">--</span><br>
+            ⚽ حجك القادم: <span id="userBooking">لا يوجد حجوزات مسجلة</span>
+        </div>
+
+        <div class="btn-group">
+            <a id="profileBtn" href="#" class="btn btn-primary">الملف الشخصي (Profile)</a>
+            <a id="bookingBtn" href="#" class="btn">احجز الملعب</a>
+            <a id="statusBtn" href="#" class="btn btn-warning">متابعة حالة الحجز</a>
+        </div>
+    </div>
+
+    <script>
+        // التشغيل الفوري بمجرد تحميل عناصر الصفحة
+        (function() {
+            // 1. قراءة البيانات القادمة من رابط URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const userName = urlParams.get('name');
+            const userPhone = urlParams.get('phone');
+
+            // 2. تغيير عنوان الترحيب فوراً بالاسم القادم من الرابط فقط
+            const titleElem = document.getElementById("userNameDisplay");
+            if (userName && userName.trim() !== "" && userName !== "null") {
+                titleElem.innerText = `أهلاً يا ${decodeURIComponent(userName)}`;
+            } else {
+                titleElem.innerText = `أهلاً بك`;
+            }
+
+            // 3. تحديث روابط باقي الأزرار لتمرير نفس الاسم والرقم
+            if (userPhone || userName) {
+                const queryParams = `?name=${encodeURIComponent(userName || '')}&phone=${encodeURIComponent(userPhone || '')}`;
+                
+                document.getElementById("profileBtn").href = `profile.html${queryParams}`;
+                document.getElementById("bookingBtn").href = `حجز.html${queryParams}`;
+                document.getElementById("statusBtn").href = `result.html${queryParams}`;
+            }
+
+            // 4. تحديث الساعة والتاريخ
+            function updateDateTime() {
+                const now = new Date();
+                document.getElementById("currentTime").innerText = now.toLocaleTimeString('ar-EG');
+                document.getElementById("currentDate").innerText = now.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            }
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        })();
+    </script>
+</body>
+</html>

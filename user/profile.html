@@ -14,16 +14,14 @@
         <div style="font-size: 16px; color: #333; line-height: 1.8;">
             <p><strong>الاسم:</strong> <span id="profileName">جاري التحميل...</span></p>
             <p><strong>رقم الهاتف:</strong> <span id="profilePhone">جاري التحميل...</span></p>
+            <p><strong>كلمة المرور:</strong> <span id="profilePassword" style="font-family: monospace; color: #c0392b; font-weight: bold;">جاري التحميل...</span></p>
         </div>
 
-        <!-- زر تسجيل الخروج -->
         <button id="logoutBtn" style="background-color: #e74c3c; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 10px;">تسجيل خروج</button>
         
-        <!-- زر العودة مع الاحتفاظ بالـ ID -->
         <button id="backBtn" style="background-color: #7f8c8d; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 100%;">العودة</button>
     </div>
 
-    <!-- استدعاء مكتبات فايربيس -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
@@ -43,15 +41,22 @@
         }
         const db = firebase.firestore();
 
+        // دالة لتوليد رقم عشوائي مكون من 6 خانات
+        function generateRandomPassword() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
         document.addEventListener("DOMContentLoaded", async () => {
             const urlParams = new URLSearchParams(window.location.search);
             let userId = urlParams.get("id");
 
             try {
                 let userData = null;
+                let userRef = null;
 
                 if (userId) {
-                    const userDoc = await db.collection("users").doc(userId).get();
+                    userRef = db.collection("users").doc(userId);
+                    const userDoc = await userRef.get();
                     if (userDoc.exists) {
                         userData = userDoc.data();
                     }
@@ -65,6 +70,7 @@
 
                     if (!snapshot.empty) {
                         userId = snapshot.docs[0].id;
+                        userRef = snapshot.docs[0].ref;
                         userData = snapshot.docs[0].data();
                     }
                 }
@@ -74,13 +80,380 @@
                     const name = userData.name || userData.userName || userData.adminName || userData.fullName || '-';
                     document.getElementById("profileName").textContent = title + name;
                     document.getElementById("profilePhone").textContent = userData.phone || "-";
+
+                    let password = userData.password;
+
+                    // إذا لم تكن كلمة المرور موجودة، يتم توليدها وحفظها في قاعدة البيانات تلقائياً
+                    if (!password && userRef) {
+                        password = generateRandomPassword();
+                        await userRef.update({ password: password });
+                    }
+
+                    // عرض كلمة المرور
+                    document.getElementById("profilePassword").textContent = password || "-";
                 } else {
                     document.getElementById("profileName").textContent = "لا يوجد بيانات";
                     document.getElementById("profilePhone").textContent = "لا يوجد بيانات";
+                    document.getElementById("profilePassword").textContent = "-";
                 }
             } catch (error) {
                 console.error("خطأ في جلب بيانات البروفايل:", error);
                 document.getElementById("profileName").textContent = "تعذر الجلب";
+                document.getElementById("profilePassword").textContent = "-";
+            }
+
+            // زر العودة مع تمرير الـ ID لصفحة tony.html
+            document.getElementById("backBtn").addEventListener("click", () => {
+                window.location.href = userId ? `tony.html?id=${userId}` : "tony.html";
+            });
+
+            // زر تسجيل الخروج
+            const logoutBtn = document.getElementById("logoutBtn");
+            logoutBtn.addEventListener("click", () => {
+                alert("تم تسجيل الخروج بنجاح.");
+                window.location.href = "../index.html";
+            });
+        });
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الشخصي للمستخدم</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <p class="title">الملف الشخصي للمستخدم</p>
+
+    <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 400px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); margin: auto;">
+        
+        <div style="font-size: 16px; color: #333; line-height: 1.8;">
+            <p><strong>الاسم:</strong> <span id="profileName">جاري التحميل...</span></p>
+            <p><strong>رقم الهاتف:</strong> <span id="profilePhone">جاري التحميل...</span></p>
+            <p><strong>كلمة المرور:</strong> <span id="profilePassword" style="font-family: monospace; color: #c0392b; font-weight: bold;">جاري التحميل...</span></p>
+        </div>
+
+        <button id="logoutBtn" style="background-color: #e74c3c; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 10px;">تسجيل خروج</button>
+        
+        <button id="backBtn" style="background-color: #7f8c8d; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 100%;">العودة</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGM0xBeu0wc2JV_4hgymDMDi1jlltf8SI",
+            authDomain: "marygrgs.firebaseapp.com",
+            projectId: "marygrgs",
+            storageBucket: "marygrgs.firebasestorage.app",
+            messagingSenderId: "866893606556",
+            appId: "1:866893606556:web:d2b7bab1c8dcd8fd038759",
+            measurementId: "G-YRH69L594N"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        // دالة لتوليد رقم عشوائي مكون من 6 خانات
+        function generateRandomPassword() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            let userId = urlParams.get("id");
+
+            try {
+                let userData = null;
+                let userRef = null;
+
+                if (userId) {
+                    userRef = db.collection("users").doc(userId);
+                    const userDoc = await userRef.get();
+                    if (userDoc.exists) {
+                        userData = userDoc.data();
+                    }
+                }
+
+                if (!userData) {
+                    const snapshot = await db.collection("users")
+                        .orderBy("createdAt", "desc")
+                        .limit(1)
+                        .get();
+
+                    if (!snapshot.empty) {
+                        userId = snapshot.docs[0].id;
+                        userRef = snapshot.docs[0].ref;
+                        userData = snapshot.docs[0].data();
+                    }
+                }
+
+                if (userData) {
+                    const title = userData.title ? userData.title + " " : "";
+                    const name = userData.name || userData.userName || userData.adminName || userData.fullName || '-';
+                    document.getElementById("profileName").textContent = title + name;
+                    document.getElementById("profilePhone").textContent = userData.phone || "-";
+
+                    let password = userData.password;
+
+                    // إذا لم تكن كلمة المرور موجودة، يتم توليدها وحفظها في قاعدة البيانات تلقائياً
+                    if (!password && userRef) {
+                        password = generateRandomPassword();
+                        await userRef.update({ password: password });
+                    }
+
+                    // عرض كلمة المرور
+                    document.getElementById("profilePassword").textContent = password || "-";
+                } else {
+                    document.getElementById("profileName").textContent = "لا يوجد بيانات";
+                    document.getElementById("profilePhone").textContent = "لا يوجد بيانات";
+                    document.getElementById("profilePassword").textContent = "-";
+                }
+            } catch (error) {
+                console.error("خطأ في جلب بيانات البروفايل:", error);
+                document.getElementById("profileName").textContent = "تعذر الجلب";
+                document.getElementById("profilePassword").textContent = "-";
+            }
+
+            // زر العودة مع تمرير الـ ID لصفحة tony.html
+            document.getElementById("backBtn").addEventListener("click", () => {
+                window.location.href = userId ? `tony.html?id=${userId}` : "tony.html";
+            });
+
+            // زر تسجيل الخروج
+            const logoutBtn = document.getElementById("logoutBtn");
+            logoutBtn.addEventListener("click", () => {
+                alert("تم تسجيل الخروج بنجاح.");
+                window.location.href = "../index.html";
+            });
+        });
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الشخصي للمستخدم</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <p class="title">الملف الشخصي للمستخدم</p>
+
+    <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 400px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); margin: auto;">
+        
+        <div style="font-size: 16px; color: #333; line-height: 1.8;">
+            <p><strong>الاسم:</strong> <span id="profileName">جاري التحميل...</span></p>
+            <p><strong>رقم الهاتف:</strong> <span id="profilePhone">جاري التحميل...</span></p>
+            <p><strong>كلمة المرور:</strong> <span id="profilePassword" style="font-family: monospace; color: #c0392b; font-weight: bold;">جاري التحميل...</span></p>
+        </div>
+
+        <button id="logoutBtn" style="background-color: #e74c3c; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 10px;">تسجيل خروج</button>
+        
+        <button id="backBtn" style="background-color: #7f8c8d; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 100%;">العودة</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGM0xBeu0wc2JV_4hgymDMDi1jlltf8SI",
+            authDomain: "marygrgs.firebaseapp.com",
+            projectId: "marygrgs",
+            storageBucket: "marygrgs.firebasestorage.app",
+            messagingSenderId: "866893606556",
+            appId: "1:866893606556:web:d2b7bab1c8dcd8fd038759",
+            measurementId: "G-YRH69L594N"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        // دالة لتوليد رقم عشوائي مكون من 6 خانات
+        function generateRandomPassword() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            let userId = urlParams.get("id");
+
+            try {
+                let userData = null;
+                let userRef = null;
+
+                if (userId) {
+                    userRef = db.collection("users").doc(userId);
+                    const userDoc = await userRef.get();
+                    if (userDoc.exists) {
+                        userData = userDoc.data();
+                    }
+                }
+
+                if (!userData) {
+                    const snapshot = await db.collection("users")
+                        .orderBy("createdAt", "desc")
+                        .limit(1)
+                        .get();
+
+                    if (!snapshot.empty) {
+                        userId = snapshot.docs[0].id;
+                        userRef = snapshot.docs[0].ref;
+                        userData = snapshot.docs[0].data();
+                    }
+                }
+
+                if (userData) {
+                    const title = userData.title ? userData.title + " " : "";
+                    const name = userData.name || userData.userName || userData.adminName || userData.fullName || '-';
+                    document.getElementById("profileName").textContent = title + name;
+                    document.getElementById("profilePhone").textContent = userData.phone || "-";
+
+                    let password = userData.password;
+
+                    // إذا لم تكن كلمة المرور موجودة، يتم توليدها وحفظها في قاعدة البيانات تلقائياً
+                    if (!password && userRef) {
+                        password = generateRandomPassword();
+                        await userRef.update({ password: password });
+                    }
+
+                    // عرض كلمة المرور
+                    document.getElementById("profilePassword").textContent = password || "-";
+                } else {
+                    document.getElementById("profileName").textContent = "لا يوجد بيانات";
+                    document.getElementById("profilePhone").textContent = "لا يوجد بيانات";
+                    document.getElementById("profilePassword").textContent = "-";
+                }
+            } catch (error) {
+                console.error("خطأ في جلب بيانات البروفايل:", error);
+                document.getElementById("profileName").textContent = "تعذر الجلب";
+                document.getElementById("profilePassword").textContent = "-";
+            }
+
+            // زر العودة مع تمرير الـ ID لصفحة tony.html
+            document.getElementById("backBtn").addEventListener("click", () => {
+                window.location.href = userId ? `tony.html?id=${userId}` : "tony.html";
+            });
+
+            // زر تسجيل الخروج
+            const logoutBtn = document.getElementById("logoutBtn");
+            logoutBtn.addEventListener("click", () => {
+                alert("تم تسجيل الخروج بنجاح.");
+                window.location.href = "../index.html";
+            });
+        });
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الشخصي للمستخدم</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <p class="title">الملف الشخصي للمستخدم</p>
+
+    <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 400px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); margin: auto;">
+        
+        <div style="font-size: 16px; color: #333; line-height: 1.8;">
+            <p><strong>الاسم:</strong> <span id="profileName">جاري التحميل...</span></p>
+            <p><strong>رقم الهاتف:</strong> <span id="profilePhone">جاري التحميل...</span></p>
+            <p><strong>كلمة المرور:</strong> <span id="profilePassword" style="font-family: monospace; color: #c0392b; font-weight: bold;">جاري التحميل...</span></p>
+        </div>
+
+        <button id="logoutBtn" style="background-color: #e74c3c; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 10px;">تسجيل خروج</button>
+        
+        <button id="backBtn" style="background-color: #7f8c8d; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 100%;">العودة</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGM0xBeu0wc2JV_4hgymDMDi1jlltf8SI",
+            authDomain: "marygrgs.firebaseapp.com",
+            projectId: "marygrgs",
+            storageBucket: "marygrgs.firebasestorage.app",
+            messagingSenderId: "866893606556",
+            appId: "1:866893606556:web:d2b7bab1c8dcd8fd038759",
+            measurementId: "G-YRH69L594N"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        // دالة لتوليد رقم عشوائي مكون من 6 خانات
+        function generateRandomPassword() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            let userId = urlParams.get("id");
+
+            try {
+                let userData = null;
+                let userRef = null;
+
+                if (userId) {
+                    userRef = db.collection("users").doc(userId);
+                    const userDoc = await userRef.get();
+                    if (userDoc.exists) {
+                        userData = userDoc.data();
+                    }
+                }
+
+                if (!userData) {
+                    const snapshot = await db.collection("users")
+                        .orderBy("createdAt", "desc")
+                        .limit(1)
+                        .get();
+
+                    if (!snapshot.empty) {
+                        userId = snapshot.docs[0].id;
+                        userRef = snapshot.docs[0].ref;
+                        userData = snapshot.docs[0].data();
+                    }
+                }
+
+                if (userData) {
+                    const title = userData.title ? userData.title + " " : "";
+                    const name = userData.name || userData.userName || userData.adminName || userData.fullName || '-';
+                    document.getElementById("profileName").textContent = title + name;
+                    document.getElementById("profilePhone").textContent = userData.phone || "-";
+
+                    let password = userData.password;
+
+                    // إذا لم تكن كلمة المرور موجودة، يتم توليدها وحفظها في قاعدة البيانات تلقائياً
+                    if (!password && userRef) {
+                        password = generateRandomPassword();
+                        await userRef.update({ password: password });
+                    }
+
+                    // عرض كلمة المرور
+                    document.getElementById("profilePassword").textContent = password || "-";
+                } else {
+                    document.getElementById("profileName").textContent = "لا يوجد بيانات";
+                    document.getElementById("profilePhone").textContent = "لا يوجد بيانات";
+                    document.getElementById("profilePassword").textContent = "-";
+                }
+            } catch (error) {
+                console.error("خطأ في جلب بيانات البروفايل:", error);
+                document.getElementById("profileName").textContent = "تعذر الجلب";
+                document.getElementById("profilePassword").textContent = "-";
             }
 
             // زر العودة مع تمرير الـ ID لصفحة tony.html

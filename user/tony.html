@@ -98,10 +98,8 @@
 <body>
 
     <div class="container">
-        <!-- المكان الذي سيظهر فيه الاسم الحقيقي -->
         <h2 id="welcomeUser">جاري تحميل الاسم...</h2>
 
-        <!-- الساعة والدقيقة والثانية والتاريخ -->
         <div class="clock-box" id="liveClock">جاري تحديث الوقت...</div>
 
         <div class="info-box">
@@ -116,7 +114,6 @@
         </div>
     </div>
 
-    <!-- استدعاء مكتبات فايربيس المتوافقة -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
@@ -166,81 +163,79 @@
             if (currentDateText) currentDateText.textContent = todayFormatted;
 
             const urlParams = new URLSearchParams(window.location.search);
+            const userName = urlParams.get("name");
+            const userPhone = urlParams.get("phone");
             let currentUserId = urlParams.get("id");
 
-            try {
-                let userData = null;
+            let displayName = "";
 
-                // 1. محاولة جلب المستخدم عبر الـ id في الرابط
-                if (currentUserId) {
+            try {
+                // 1. إذا كان الاسم موجوداً مباشرة في الـ URL
+                if (userName && userName !== "null" && userName.trim() !== "") {
+                    displayName = decodeURIComponent(userName);
+                } 
+                // 2. إذا لم يكن بالـ URL وكان هناك ID، نجلب الاسم الخاص بهذا الـ ID فقط
+                else if (currentUserId) {
                     const userDoc = await db.collection("users").doc(currentUserId).get();
                     if (userDoc.exists) {
-                        userData = userDoc.data();
+                        const userData = userDoc.data();
+                        displayName = userData.name || userData.fullName || userData.userName || userData.username || "";
                     }
                 }
 
-                // 2. إذا لم يوجد id في الرابط أو لم يتم العثور عليه، نجلب أحدث مستخدم مسجل
-                if (!userData) {
-                    const snapshot = await db.collection("users").limit(1).get();
-                    if (!snapshot.empty) {
-                        currentUserId = snapshot.docs[0].id;
-                        userData = snapshot.docs[0].data();
-                    }
-                }
-
-                // 3. طباعة الاسم بشكل دقيق وبحث شامل في كل الاحتمالات الممكنة للحقول
-                if (userData) {
-                    // فحص جميع الحقول المحتملة للاسم في قاعدة البيانات
-                    const realName = userData.name || userData.fullName || userData.userName || userData.username || userData.adminName || userData.firstName;
-                    
-                    if (realName) {
-                        welcomeElement.textContent = `أهلاً يا ${realName}`;
-                    } else {
-                        // إذا كانت البيانات موجودة لكن حقل الاسم فارغ، نطبع أول مفتاح أو قيمة نصية نجدها
-                        welcomeElement.textContent = `أهلاً بك`;
-                    }
+                // طباعة الاسم دائماً بدون أن يختفي
+                if (displayName) {
+                    welcomeElement.textContent = `أهلاً يا ${displayName}`;
                 } else {
-                    welcomeElement.textContent = "أهلاً يا صديقي";
+                    welcomeElement.textContent = "أهلاً بك";
                 }
 
-                // 4. جلب الحجز الخاص بالمستخدم
-                if (currentUserId) {
-                    const bookingSnapshot = await db.collection("bookings")
-                        .where("userId", "==", currentUserId)
-                        .get();
+                // 3. جلب الحجز الخاص بالمستخدم (عن طريق الهاتف أو الـ ID)
+                let bookingSnapshot = null;
+                if (userPhone) {
+                    bookingSnapshot = await db.collection("bookings").where("phone", "==", userPhone.trim()).get();
+                } else if (currentUserId) {
+                    bookingSnapshot = await db.collection("bookings").where("userId", "==", currentUserId).get();
+                }
 
-                    if (!bookingSnapshot.empty) {
-                        let bookings = [];
-                        bookingSnapshot.forEach(doc => { bookings.push(doc.data()); });
-                        const bookingData = bookings[bookings.length - 1]; // أحدث حجز
+                if (bookingSnapshot && !bookingSnapshot.empty) {
+                    let bookings = [];
+                    bookingSnapshot.forEach(doc => { bookings.push(doc.data()); });
+                    const bookingData = bookings[bookings.length - 1]; // أحدث حجز
 
-                        const bDate = bookingData.date || "غير محدد";
-                        const bTime = bookingData.time || "غير محدد";
-                        const bStatus = bookingData.status || "قيد الانتظار";
-                        
-                        nextBookingText.innerHTML = `${bDate} (${bTime}) - <span style="color: ${bStatus === 'مقبول' ? '#27ae60' : '#e67e22'}">${bStatus}</span>`;
-                    } else {
-                        nextBookingText.textContent = "لا يوجد حجوزات مسجلة";
-                    }
+                    const bDate = bookingData.date || "غير محدد";
+                    const bTime = bookingData.time || "غير محدد";
+                    const bStatus = bookingData.status || "قيد الانتظار";
+                    
+                    nextBookingText.innerHTML = `${bDate} (${bTime}) - <span style="color: ${bStatus === 'مقبول' ? '#27ae60' : '#e67e22'}">${bStatus}</span>`;
+                } else {
+                    nextBookingText.textContent = "لا يوجد حجوزات مسجلة";
                 }
 
             } catch (error) {
                 console.error("خطأ في جلب البيانات: ", error);
-                welcomeElement.textContent = "أهلاً بك";
-                nextBookingText.textContent = "تعذر جلب الحجز";
+                if (displayName) {
+                    welcomeElement.textContent = `أهلاً يا ${displayName}`;
+                } else {
+                    welcomeElement.textContent = "أهلاً بك";
+                }
+                nextBookingText.textContent = "لا يوجد حجوزات مسجلة";
             }
 
-            // تفعيل الأزرار مع تمرير الـ id
+            // إعداد رابط الـ URL للتنقل مع الحفاظ على كل البيانات
+            const queryParams = `?name=${encodeURIComponent(userName || displayName || '')}&phone=${encodeURIComponent(userPhone || '')}&id=${encodeURIComponent(currentUserId || '')}`;
+
+            // تفعيل الأزرار
             document.getElementById("profileBtn").addEventListener("click", () => {
-                window.location.href = currentUserId ? `profile.html?id=${currentUserId}` : "profile.html";
+                window.location.href = `profile.html${queryParams}`;
             });
 
-    document.getElementById("bookingBtn").addEventListener("click", () => {
-    window.location.href = currentUserId ? `حجز .html?id=${currentUserId}` : "حجز .html";
-});
+            document.getElementById("bookingBtn").addEventListener("click", () => {
+                window.location.href = `حجز .html${queryParams}`;
+            });
 
             document.getElementById("resultBtn").addEventListener("click", () => {
-                window.location.href = currentUserId ? `result.html?id=${currentUserId}` : "result.html";
+                window.location.href = `result.html${queryParams}`;
             });
         });
     </script>

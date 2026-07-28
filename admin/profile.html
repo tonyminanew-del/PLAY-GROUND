@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,11 +15,12 @@
             <p><strong>اللقب:</strong> <span id="profileTitle">جاري التحميل...</span></p>
             <p><strong>الاسم:</strong> <span id="profileName">جاري التحميل...</span></p>
             <p><strong>رقم الهاتف:</strong> <span id="profilePhone">جاري التحميل...</span></p>
+            <p><strong>كلمة المرور:</strong> <span id="profilePassword" style="font-family: monospace; color: #c0392b; font-weight: bold;">جاري التحميل...</span></p>
         </div>
 
         <button id="logoutBtn" style="background-color: #e74c3c; width: 100%; margin-top: 10px;">تسجيل خروج</button>
         
-        <button id="backBtn" style="background-color: #7f8c8d; width: 100%;">العودة لوحة التحكم</button>
+        <button onclick="window.location.href='admin.html'" style="background-color: #7f8c8d; width: 100%;">العودة لوحة التحكم</button>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -36,72 +37,48 @@
             measurementId: "G-YRH69L594N"
         };
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // دالة لتوليد رقم عشوائي مكون من 6 خانات لكل خادم/مشرف
+        function generateRandomPassword() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
         document.addEventListener("DOMContentLoaded", async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            // قراءة بياناتك من الـ URL أو الـ LocalStorage للحفاظ عليها
-            let adminId = urlParams.get("id") || localStorage.getItem("savedAdminId");
-            let adminName = urlParams.get("name") || localStorage.getItem("savedAdminName");
-            let adminPhone = urlParams.get("phone") || localStorage.getItem("savedAdminPhone");
-
             try {
-                let foundData = null;
+                // جلب أحدث بيانات مسجلة في قاعدة البيانات لعرضها في البروفايل
+                const snapshot = await db.collection("admins")
+                    .orderBy("createdAt", "desc")
+                    .limit(1)
+                    .get();
 
-                // 1. البحث عنك أنت تحديداً بالـ ID في الفايربيس
-                if (adminId) {
-                    const doc = await db.collection("admins").doc(adminId).get();
-                    if (doc.exists) {
-                        foundData = doc.data();
-                    }
-                }
+                if (!snapshot.empty) {
+                    const docRef = snapshot.docs[0].ref; // مرجع المستند لتحديثه
+                    const data = snapshot.docs[0].data();
 
-                // 2. إذا لم يجد بالـ ID، يبحث برقم هاتفك أنت فقط
-                if (!foundData && adminPhone) {
-                    const snap = await db.collection("admins").where("phone", "==", adminPhone.trim()).get();
-                    if (!snap.empty) {
-                        foundData = snap.docs[0].data();
-                    }
-                }
-
-                // 3. عرض بياناتك
-                if (foundData) {
-                    document.getElementById("profileTitle").textContent = foundData.title || "مشرف";
-                    document.getElementById("profileName").textContent = foundData.name || adminName || "-";
-                    document.getElementById("profilePhone").textContent = foundData.phone || adminPhone || "-";
+                    document.getElementById("profileTitle").textContent = data.title || "-";
+                    document.getElementById("profileName").textContent = data.name || "-";
+                    document.getElementById("profilePhone").textContent = data.phone || "-";
                     
-                    // تحديث التخزين المحلي ببياناتك الصحيحة
-                    if (foundData.name) localStorage.setItem("savedAdminName", foundData.name);
-                    if (foundData.phone) localStorage.setItem("savedAdminPhone", foundData.phone);
-                } else {
-                    document.getElementById("profileTitle").textContent = "مشرف";
-                    document.getElementById("profileName").textContent = adminName || "-";
-                    document.getElementById("profilePhone").textContent = adminPhone || "-";
-                }
+                    let password = data.password;
 
+                    // إذا لم يكن لدى المشرف كلمة مرور مسجلة، يتم توليدها وحفظها في البيز تلقائياً
+                    if (!password) {
+                        password = generateRandomPassword();
+                        await docRef.update({ password: password });
+                    }
+
+                    // عرض كلمة المرور في الصفحة
+                    document.getElementById("profilePassword").textContent = password;
+                }
             } catch (error) {
                 console.error("خطأ في جلب بيانات البروفايل:", error);
-                document.getElementById("profileTitle").textContent = "مشرف";
-                document.getElementById("profileName").textContent = adminName || "-";
-                document.getElementById("profilePhone").textContent = adminPhone || "-";
             }
 
-            // زر العودة لوحة التحكم مع نقل بياناتك أنت فقط
-            document.getElementById("backBtn").addEventListener("click", () => {
-                const queryParams = `?name=${encodeURIComponent(adminName || '')}&phone=${encodeURIComponent(adminPhone || '')}&id=${encodeURIComponent(adminId || '')}`;
-                window.location.href = `admin.html${queryParams}`;
-            });
-
-            // زر تسجيل الخروج وتفريغ البيانات
+            // زر تسجيل الخروج (يعيدك لصفحة index.html الرئيسية)
             const logoutBtn = document.getElementById("logoutBtn");
             logoutBtn.addEventListener("click", () => {
-                localStorage.removeItem("savedAdminName");
-                localStorage.removeItem("savedAdminPhone");
-                localStorage.removeItem("savedAdminId");
                 alert("تم تسجيل الخروج بنجاح.");
                 window.location.href = "../index.html";
             });

@@ -3,163 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gaming Portal - Login</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
-
+    <title>تسجيل الدخول - CONTROL PORTAL</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Tajawal', sans-serif;
-        }
-
         body {
-            background-color: #0b0c10;
-            background-image: radial-gradient(circle at 50% 50%, #1f2833 0%, #0b0c10 100%);
-            color: #c5c6c7;
-            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #121824;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            height: 100vh;
+            margin: 0;
+            color: white;
         }
-
-        .login-card {
-            background: #1f2833;
-            border: 2px solid #66fcf1;
-            box-shadow: 0 0 20px rgba(102, 252, 241, 0.3), inset 0 0 15px rgba(102, 252, 241, 0.1);
-            border-radius: 15px;
-            padding: 40px 30px;
-            width: 100%;
-            max-width: 420px;
+        .login-box {
+            background: #1e293b;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+            border: 2px solid #38bdf8;
+            width: 90%;
+            max-width: 380px;
             text-align: center;
-            position: relative;
         }
-
-        .welcome-title {
-            color: #66fcf1;
-            font-weight: 900;
-            font-size: 24px;
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(102, 252, 241, 0.5);
+        h2 {
+            color: #38bdf8;
+            margin-bottom: 25px;
+            font-size: 22px;
+            letter-spacing: 1px;
         }
-
-        .step {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
         label {
-            font-size: 16px;
-            color: #c5c6c7;
+            display: block;
+            margin-bottom: 8px;
             text-align: right;
-            font-weight: 700;
+            font-size: 15px;
+            color: #cbd5e1;
         }
-
-        input {
-            background-color: #0b0c10;
-            border: 1px solid #45a29e;
-            color: #fff;
-            padding: 12px 15px;
-            border-radius: 8px;
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
+            border-radius: 6px;
             font-size: 16px;
-            outline: none;
-            transition: all 0.3s ease;
+            box-sizing: border-box;
+            margin-bottom: 20px;
             text-align: center;
         }
-
-        input:focus {
-            border-color: #66fcf1;
-            box-shadow: 0 0 12px rgba(102, 252, 241, 0.8);
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
         button {
-            background: linear-gradient(45deg, #45a29e, #66fcf1);
-            color: #0b0c10;
-            font-weight: 900;
+            width: 100%;
+            padding: 12px;
+            background-color: #2dd4bf;
+            color: #0f172a;
             border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(102, 252, 241, 0.4);
-            flex: 1;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 20px rgba(102, 252, 241, 0.8);
-        }
-
-        button.btn-danger {
-            background: linear-gradient(45deg, #ff4b2b, #ff416c);
-            color: #fff;
-            box-shadow: 0 0 10px rgba(255, 65, 108, 0.4);
-        }
-
-        button.btn-danger:hover {
-            box-shadow: 0 0 20px rgba(255, 65, 108, 0.8);
-        }
-
-        p.question {
+            border-radius: 6px;
             font-size: 18px;
-            color: #fff;
-            margin-bottom: 10px;
+            cursor: pointer;
             font-weight: bold;
+            transition: 0.3s;
         }
-
-        .loading-text {
-            color: #66fcf1;
-            font-size: 14px;
-            display: none;
+        button:hover { background-color: #14b8a6; }
+        .status-msg {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #94a3b8;
         }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <h2 id="headerTitle" class="welcome-title">CONTROL PORTAL</h2>
+    <div class="login-box">
+        <h2>CONTROL PORTAL</h2>
+        
+        <form id="loginForm">
+            <label>رقم الهاتف:</label>
+            <input type="text" id="phoneInput" placeholder="أدخل رقم الهاتف" required>
+            <button type="submit" id="submitBtn">دخول</button>
+        </form>
 
-        <div id="step-phone" class="step">
-            <label for="phoneInput">رقم الهاتف:</label>
-            <input type="text" id="phoneInput" placeholder="أدخل رقمك المسجل">
-            <button onclick="checkUserType()">دخول</button>
-            <span id="loader" class="loading-text">جاري البحث في قاعدة البيانات...</span>
-        </div>
-
-        <div id="step-password" class="step" style="display: none;">
-            <label for="passInput">كلمة السر الخاصة بالـ Admin:</label>
-            <input type="password" id="passInput" placeholder="••••••••">
-            <button onclick="verifyAdminPassword()">تأكيد كلمة السر</button>
-        </div>
-
-        <div id="step-confirm-name" class="step" style="display: none;">
-            <p id="nameQuestion" class="question"></p>
-            <div class="btn-group">
-                <button onclick="confirmIdentity(true)">نعم</button>
-                <button class="btn-danger" onclick="confirmIdentity(false)">لا</button>
-            </div>
-        </div>
-
-        <div id="step-extra-info" class="step" style="display: none;">
-            <label for="fullNameInput">ادخل الاسم واللقب (أخ / تاسوني / أبونا):</label>
-            <input type="text" id="fullNameInput" placeholder="مثال: أبونا متأس / أخ مينا">
-            <button onclick="submitExtraInfo()">حفظ ومتابعة</button>
-        </div>
+        <div class="status-msg" id="statusMsg">جاري البحث في قاعدة البيانات...</div>
     </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <script>
         const firebaseConfig = {
@@ -172,138 +98,55 @@
             measurementId: "G-YRH69L594N"
         };
 
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.firestore();
 
-        let currentUserData = null;
-        let currentDocId = "";
-        let currentCollection = "";
-        let currentPhoneVal = "";
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const phoneVal = document.getElementById('phoneInput').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            const statusMsg = document.getElementById('statusMsg');
 
-        async function checkUserType() {
-            currentPhoneVal = document.getElementById('phoneInput').value.trim();
-            const loader = document.getElementById('loader');
-
-            if (!currentPhoneVal) {
-                alert("يرجى إدخال رقم الهاتف!");
-                return;
-            }
-
-            loader.style.display = "block";
+            if (!phoneVal) return;
 
             try {
-                let foundData = null;
+                submitBtn.disabled = true;
+                statusMsg.textContent = "جاري التحقق من الحساب...";
 
-                // 1. البحث في admins بالمطابقة التامة للرقم
-                const adminSnapshot = await db.collection('admins').get();
-                adminSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (String(data.phone).trim() === currentPhoneVal || doc.id.trim() === currentPhoneVal) {
-                        foundData = data;
-                        currentDocId = doc.id;
-                        currentCollection = 'admins';
-                    }
-                });
+                // البحث برقم الهاتف في قاعدة البيانات
+                const snapshot = await db.collection("users")
+                    .where("phone", "==", phoneVal)
+                    .get();
 
-                if (foundData) {
-                    loader.style.display = "none";
-                    currentUserData = foundData;
-                    document.getElementById('step-phone').style.display = 'none';
-                    document.getElementById('step-password').style.display = 'block';
-                    return;
-                }
+                if (!snapshot.empty) {
+                    const doc = snapshot.docs[0];
+                    const userData = doc.data();
+                    const userId = doc.id;
+                    const userName = userData.name || userData.userName || "مستخدم";
 
-                // 2. البحث في users بالمطابقة التامة للرقم
-                const userSnapshot = await db.collection('users').get();
-                userSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (String(data.phone).trim() === currentPhoneVal || doc.id.trim() === currentPhoneVal) {
-                        foundData = data;
-                        currentDocId = doc.id;
-                        currentCollection = 'users';
-                    }
-                });
+                    // حفظ البيانات الخاصة بك فقط لمنع تغيرها
+                    localStorage.setItem("savedUserId", userId);
+                    localStorage.setItem("savedUserName", userName);
+                    localStorage.setItem("savedUserPhone", phoneVal);
 
-                loader.style.display = "none";
+                    alert(`أهلاً يا ${userName}`);
 
-                if (foundData) {
-                    currentUserData = foundData;
-                    const userName = currentUserData.name || currentUserData.fullName || "المستخدم";
-                    const role = (currentUserData.role || '').toLowerCase();
-
-                    if (role === 'admin') {
-                        document.getElementById('step-phone').style.display = 'none';
-                        document.getElementById('step-password').style.display = 'block';
-                    } else {
-                        alert(`أهلاً يا ${userName}`);
-                        const nameParam = encodeURIComponent(userName);
-                        const phoneParam = encodeURIComponent(currentPhoneVal);
-                        
-                        window.location.href = `user/tony.html?name=${nameParam}&phone=${phoneParam}`;
-                    }
+                    // التوجيه مع تمرير كل البيانات
+                    window.location.href = `user/tony.html?id=${encodeURIComponent(userId)}&name=${encodeURIComponent(userName)}&phone=${encodeURIComponent(phoneVal)}`;
                 } else {
-                    alert("هذا الرقم غير مسجل في النظام!");
+                    alert("رقم الهاتف غير مسجل!");
+                    submitBtn.disabled = false;
+                    statusMsg.textContent = "";
                 }
-
-            } catch (error) {
-                loader.style.display = "none";
-                console.error("Firestore Error:", error);
-                alert("حدث خطأ أثناء الاتصال بالفايرستور: " + error.message);
+            } catch (err) {
+                console.error("خطأ الدخول:", err);
+                alert("حدث خطأ في الاتصال بقاعدة البيانات");
+                submitBtn.disabled = false;
+                statusMsg.textContent = "";
             }
-        }
-
-        function verifyAdminPassword() {
-            const password = document.getElementById('passInput').value;
-            const ADMIN_PASS = "TONY@CONTROL2026";
-
-            if (password === ADMIN_PASS) {
-                const userName = currentUserData.name || currentUserData.fullName || "المستخدم";
-                
-                document.getElementById('headerTitle').innerText = `أهلاً يا ${userName}`;
-                document.getElementById('nameQuestion').innerText = `هل أنت ${userName}؟`;
-
-                document.getElementById('step-password').style.display = 'none';
-                document.getElementById('step-confirm-name').style.display = 'block';
-            } else {
-                alert("كلمة السر غير صحيحة!");
-            }
-        }
-
-        function confirmIdentity(isCorrectName) {
-            const userName = currentUserData.name || currentUserData.fullName || "المستخدم";
-            const nameParam = encodeURIComponent(userName);
-            const phoneParam = encodeURIComponent(currentPhoneVal);
-
-            if (isCorrectName) {
-                window.location.href = `admin/admin.html?name=${nameParam}&phone=${phoneParam}`;
-            } else {
-                document.getElementById('step-confirm-name').style.display = 'none';
-                document.getElementById('step-extra-info').style.display = 'block';
-            }
-        }
-
-        async function submitExtraInfo() {
-            const fullName = document.getElementById('fullNameInput').value.trim();
-            
-            if (fullName !== "") {
-                try {
-                    await db.collection(currentCollection).doc(currentDocId).update({
-                        name: fullName
-                    });
-                    
-                    alert("تم حفظ البيانات بنجاح!");
-                    const nameParam = encodeURIComponent(fullName);
-                    const phoneParam = encodeURIComponent(currentPhoneVal);
-                    
-                    window.location.href = `admin/admin.html?name=${nameParam}&phone=${phoneParam}`;
-                } catch (error) {
-                    console.error(error);
-                    alert("حدث خطأ أثناء حفظ البيانات!");
-                }
-            } else {
-                alert("يرجى إدخال الاسم واللقب بشكل صحيح.");
-            }
-        }
+        });
     </script>
 </body>
 </html>

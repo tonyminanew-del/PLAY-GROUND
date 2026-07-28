@@ -82,7 +82,7 @@
         <form id="profileLoginForm">
             <input type="text" id="profilePasswordInput" placeholder="كلمة المرور (6 أرقام)" required>
             <button type="submit" id="submitBtn">دخول</button>
-            <p id="errorMsg">كلمة المرور غير صحيحة، يجيب التأكد منها!</p>
+            <p id="errorMsg">كلمة المرور غير مسجلة أو خطأ!</p>
         </form>
     </div>
 
@@ -120,7 +120,7 @@
                 // 1. البحث في جدول المشرفين (admins)
                 const adminQuery = await db.collection("admins").where("password", "==", enteredPass).get();
                 if (!adminQuery.empty) {
-                    // إذا كان أدمن، يذهب لصفحة تحكم الأدمن
+                    console.log("تم العثور على الأدمن، جاري التوجيه...");
                     window.location.href = "admin/admin.html";
                     return;
                 }
@@ -128,20 +128,23 @@
                 // 2. البحث في جدول المستخدمين (users)
                 const userQuery = await db.collection("users").where("password", "==", enteredPass).get();
                 if (!userQuery.empty) {
-                    // إذا كان مستخدم، نأخذ الـ ID الخاص به ونوجهه لصفحته مع الـ ID
                     const userId = userQuery.docs[0].id;
-                    window.location.href = `tony.html?id=${userId}`;
+                    console.log("تم العثور على المستخدم، الـ ID هو: " + userId);
+                    
+                    // تم تحديث المسار ليدخل إلى مجلد user حيث يوجد الملف tony.html
+                    window.location.href = `user/tony.html?id=${userId}`;
                     return;
                 }
 
-                // إذا لم تطابق أي كلمة مرور
+                // إذا لم تطابق أي كلمة مرور في القاعدتين
+                console.warn("كلمة المرور غير مطابقة لأي سجل في القاعدة.");
                 errorMsg.style.display = "block";
                 submitBtn.textContent = "دخول";
                 submitBtn.disabled = false;
 
             } catch (error) {
-                console.error("خطأ أثناء التحقق من كلمة المرور:", error);
-                alert("حدث خطأ ما، يجدر المحاولة لاحقاً.");
+                console.error("خطأ أثناء الاتصال بقاعدة البيانات:", error);
+                alert("حدث خطأ في الاتصال، تأكد من الانترنت.");
                 submitBtn.textContent = "دخول";
                 submitBtn.disabled = false;
             }

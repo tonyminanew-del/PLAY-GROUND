@@ -3,115 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الصفحة الرئيسية للمستخدم</title>
+    <title>User Homepage</title>
     <link rel="stylesheet" href="../style.css">
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #2c3e50;
-            color: #fff;
-            padding: 20px;
-            margin: 0;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
+            margin: 0;
         }
         .container {
-            width: 100%;
-            max-width: 450px;
             background: white;
-            color: #333;
-            padding: 25px;
+            padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 400px;
             text-align: center;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            box-sizing: border-box;
         }
-        h2 {
+        .welcome-title {
+            font-size: 24px;
+            font-weight: bold;
             color: #2c3e50;
-            margin: 0 0 5px 0;
+            margin-bottom: 15px;
         }
         .info-box {
-            background-color: #f8f9fa;
+            background: #fdf3e7;
+            border: 1px solid #f5cba7;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #d35400;
+        }
+        .details-box {
+            background: #f8f9fa;
             border: 1px solid #e9ecef;
             padding: 12px;
             border-radius: 8px;
-            text-align: right;
+            margin-bottom: 20px;
             font-size: 14px;
-            color: #495057;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+            color: #2c3e50;
+            line-height: 1.6;
         }
-        .info-box span {
-            font-weight: bold;
-            color: #2980b9;
-        }
-        .clock-box {
-            font-size: 15px;
-            font-weight: bold;
-            color: #e67e22;
-            background: #fdf3e7;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #f5cba7;
-        }
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 5px;
-        }
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
+        .btn {
+            display: block;
             width: 100%;
-            transition: background 0.3s;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-sizing: border-box;
+            text-decoration: none;
         }
-        button:hover {
-            background-color: #2980b9;
-        }
-        .btn-booking {
-            background-color: #27ae60;
-        }
-        .btn-booking:hover {
-            background-color: #219653;
-        }
-        .btn-result {
-            background-color: #e67e22;
-        }
-        .btn-result:hover {
-            background-color: #d35400;
-        }
+        .btn-profile { background-color: #3498db; }
+        .btn-book { background-color: #2ecc71; }
+        .btn-status { background-color: #e67e22; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2 id="welcomeUser">جاري تحميل الاسم...</h2>
+        <div class="welcome-title" id="welcomeText">أهلاً بك</div>
 
-        <div class="clock-box" id="liveClock">جاري تحديث الوقت...</div>
+        <div class="info-box" id="liveClock">⏰ الوقت: --:--:-- --</div>
 
-        <div class="info-box">
-            <div>📅 <strong>تاريخ اليوم:</strong> <span id="currentDateText">جاري الحساب...</span></div>
-            <div>⚽ <strong>حجزك القادم:</strong> <span id="nextBookingText">جاري البحث عن حجز...</span></div>
+        <div class="details-box">
+            <div>📅 <strong>تاريخ اليوم:</strong> <span id="currentDateText">جاري التحميل...</span></div>
+            <div>⚽ <strong>حجزك القادم:</strong> <span id="nextBookingText">لا يوجد حجوزات مسجلة</span></div>
         </div>
 
-        <div class="btn-group">
-            <button type="button" id="profileBtn">الملف الشخصي (Profile)</button>
-            <button type="button" id="bookingBtn" class="btn-booking">احجز الملعب</button>
-            <button type="button" id="resultBtn" class="btn-result">متابعة حالة الحجز</button>
-        </div>
+        <button class="btn btn-profile" onclick="goToPage('profile.html')">الملف الشخصي (Profile)</button>
+        <button class="btn btn-book" onclick="goToPage('حجز .html')">احجز الملعب</button>
+        <button class="btn btn-status" onclick="goToPage('result.html')">متابعة حالة الحجز</button>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -133,111 +104,68 @@
         }
         const db = firebase.firestore();
 
-        // تحديث الساعة بشكل حي
+        // تحديث الساعة الحية
         function updateClock() {
             const now = new Date();
             let hours = now.getHours();
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             const ampm = hours >= 12 ? 'مساءً' : 'صباحاً';
-            
-            hours = hours % 12;
-            hours = hours ? hours : 12; 
-            const formattedHours = String(hours).padStart(2, '0');
+            hours = hours % 12 || 12;
 
-            const clockElement = document.getElementById("liveClock");
-            if (clockElement) {
-                clockElement.textContent = `⏰ الوقت: ${formattedHours}:${minutes}:${seconds} ${ampm}`;
-            }
+            document.getElementById("liveClock").textContent = `⏰ الوقت: ${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
         }
         setInterval(updateClock, 1000);
         updateClock();
 
+        // متغيرات الحساب
+        let userId = "";
+        let userName = "";
+        let userPhone = "";
+
         document.addEventListener("DOMContentLoaded", async () => {
-            const welcomeElement = document.getElementById("welcomeUser");
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            userId = urlParams.get("id") || localStorage.getItem("savedUserId");
+            userName = urlParams.get("name") || localStorage.getItem("savedUserName");
+            userPhone = urlParams.get("phone") || localStorage.getItem("savedUserPhone");
+
+            const welcomeText = document.getElementById("welcomeText");
             const currentDateText = document.getElementById("currentDateText");
-            const nextBookingText = document.getElementById("nextBookingText");
 
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const todayFormatted = new Date().toLocaleDateString('ar-EG', options);
-            if (currentDateText) currentDateText.textContent = todayFormatted;
+            currentDateText.textContent = new Date().toLocaleDateString('ar-EG', options);
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const userName = urlParams.get("name");
-            const userPhone = urlParams.get("phone");
-            let currentUserId = urlParams.get("id");
-
-            let displayName = "";
-
-            try {
-                // 1. إذا كان الاسم موجوداً مباشرة في الـ URL
-                if (userName && userName !== "null" && userName.trim() !== "") {
-                    displayName = decodeURIComponent(userName);
-                } 
-                // 2. إذا لم يكن بالـ URL وكان هناك ID، نجلب الاسم الخاص بهذا الـ ID فقط
-                else if (currentUserId) {
-                    const userDoc = await db.collection("users").doc(currentUserId).get();
+            // جلب وتثبيت بيانات الحساب فقط
+            if (userId) {
+                try {
+                    const userDoc = await db.collection("users").doc(userId).get();
                     if (userDoc.exists) {
                         const userData = userDoc.data();
-                        displayName = userData.name || userData.fullName || userData.userName || userData.username || "";
+                        userName = userData.name || userData.userName || userName;
+                        userPhone = userData.phone || userPhone;
+
+                        localStorage.setItem("savedUserId", userId);
+                        localStorage.setItem("savedUserName", userName);
+                        localStorage.setItem("savedUserPhone", userPhone);
                     }
+                } catch (e) {
+                    console.error("خطأ قراءة بيانات المستخدم:", e);
                 }
-
-                // طباعة الاسم دائماً بدون أن يختفي
-                if (displayName) {
-                    welcomeElement.textContent = `أهلاً يا ${displayName}`;
-                } else {
-                    welcomeElement.textContent = "أهلاً بك";
-                }
-
-                // 3. جلب الحجز الخاص بالمستخدم (عن طريق الهاتف أو الـ ID)
-                let bookingSnapshot = null;
-                if (userPhone) {
-                    bookingSnapshot = await db.collection("bookings").where("phone", "==", userPhone.trim()).get();
-                } else if (currentUserId) {
-                    bookingSnapshot = await db.collection("bookings").where("userId", "==", currentUserId).get();
-                }
-
-                if (bookingSnapshot && !bookingSnapshot.empty) {
-                    let bookings = [];
-                    bookingSnapshot.forEach(doc => { bookings.push(doc.data()); });
-                    const bookingData = bookings[bookings.length - 1]; // أحدث حجز
-
-                    const bDate = bookingData.date || "غير محدد";
-                    const bTime = bookingData.time || "غير محدد";
-                    const bStatus = bookingData.status || "قيد الانتظار";
-                    
-                    nextBookingText.innerHTML = `${bDate} (${bTime}) - <span style="color: ${bStatus === 'مقبول' ? '#27ae60' : '#e67e22'}">${bStatus}</span>`;
-                } else {
-                    nextBookingText.textContent = "لا يوجد حجوزات مسجلة";
-                }
-
-            } catch (error) {
-                console.error("خطأ في جلب البيانات: ", error);
-                if (displayName) {
-                    welcomeElement.textContent = `أهلاً يا ${displayName}`;
-                } else {
-                    welcomeElement.textContent = "أهلاً بك";
-                }
-                nextBookingText.textContent = "لا يوجد حجوزات مسجلة";
             }
 
-            // إعداد رابط الـ URL للتنقل مع الحفاظ على كل البيانات
-            const queryParams = `?name=${encodeURIComponent(userName || displayName || '')}&phone=${encodeURIComponent(userPhone || '')}&id=${encodeURIComponent(currentUserId || '')}`;
-
-            // تفعيل الأزرار
-            document.getElementById("profileBtn").addEventListener("click", () => {
-                window.location.href = `profile.html${queryParams}`;
-            });
-
-            document.getElementById("bookingBtn").addEventListener("click", () => {
-                window.location.href = `حجز .html${queryParams}`;
-            });
-
-            document.getElementById("resultBtn").addEventListener("click", () => {
-                window.location.href = `result.html${queryParams}`;
-            });
+            if (userName && userName !== "null") {
+                welcomeText.textContent = `أهلاً يا ${decodeURIComponent(userName)}`;
+            } else {
+                welcomeText.textContent = "أهلاً بك";
+            }
         });
+
+        // دالة تحويل الصفحات مع الحفاظ الكامل على البيانات
+        function goToPage(targetPage) {
+            const queryParams = `?id=${encodeURIComponent(userId || '')}&name=${encodeURIComponent(userName || '')}&phone=${encodeURIComponent(userPhone || '')}`;
+            window.location.href = targetPage + queryParams;
+        }
     </script>
 </body>
 </html>

@@ -21,7 +21,7 @@
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
+            width: 90%;
             max-width: 400px;
             text-align: center;
         }
@@ -34,7 +34,7 @@
 
         input[type="text"] {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 16px;
@@ -50,7 +50,7 @@
 
         button {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background-color: #007bff;
             color: white;
             border: none;
@@ -58,40 +58,60 @@
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            font-weight: bold;
         }
 
         button:hover {
             background-color: #0056b3;
+        }
+
+        /* تنسيق اللينك في الأسفل */
+        .link-container {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .existing-account-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .existing-account-link:hover {
+            color: #0056b3;
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
 
     <div class="login-box">
-        <h2>اهلا ببرنامج ملعب كنيسة الشهيد العظيم مارجرجس</h2>
+        <h2>أهلاً بكم في برنامج ملعب كنيسة الشهيد العظيم مارجرجس</h2>
         
         <form id="loginForm">
-            <input type="text" id="userInput" placeholder="أدخل الاسم " required>
+            <input type="text" id="userInput" placeholder="أدخل الاسم" required>
             <button type="submit">دخول</button>
         </form>
+
+        <div class="link-container">
+            <a href="user_login.html" class="existing-account-link">لديك حساب من قبل؟ اضغط هنا</a>
+        </div>
     </div>
 
     <script>
         document.getElementById('loginForm').addEventListener('submit', function(event) {
-            // منع إعادة تحميل الصفحة الافتراضي
             event.preventDefault();
-
-            // جلب القيمة المدخلة مع إزالة المسافات الزائدة
             const inputVal = document.getElementById('userInput').value.trim();
 
-            // التحقق من كلمة السر أو الاسم والتوجيه حسب المطلوب
             if (inputVal === 'TONY@CONTROL2026') {
-                window.location.href = 'admin/sign.html'; // أو 'sign.html' حسب مكان الملف عندك
+                window.location.href = 'admin/sign.html';
             } else {
                 window.location.href = 'user.html';
             }
         });
     </script>
-
 </body>
 </html>

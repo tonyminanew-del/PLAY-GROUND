@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - البروفايل</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-box {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        input[type="text"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #errorMsg {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <h2>أدخل كلمة مرور البروفايل الخاص بك</h2>
+        
+        <form id="profileLoginForm">
+            <input type="text" id="profilePasswordInput" placeholder="كلمة المرور (6 أرقام)" required>
+            <button type="submit" id="submitBtn">دخول</button>
+            <p id="errorMsg">كلمة المرور غير صحيحة، يجيب التأكد منها!</p>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGM0xBeu0wc2JV_4hgymDMDi1jlltf8SI",
+            authDomain: "marygrgs.firebaseapp.com",
+            projectId: "marygrgs",
+            storageBucket: "marygrgs.firebasestorage.app",
+            messagingSenderId: "866893606556",
+            appId: "1:866893606556:web:d2b7bab1c8dcd8fd038759",
+            measurementId: "G-YRH69L594N"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        document.getElementById('profileLoginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const enteredPass = document.getElementById('profilePasswordInput').value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            const submitBtn = document.getElementById('submitBtn');
+
+            submitBtn.textContent = "جاري التحقق...";
+            submitBtn.disabled = true;
+            errorMsg.style.display = "none";
+
+            try {
+                // 1. البحث في جدول المشرفين (admins)
+                const adminQuery = await db.collection("admins").where("password", "==", enteredPass).get();
+                if (!adminQuery.empty) {
+                    // إذا كان أدمن، يذهب لصفحة تحكم الأدمن
+                    window.location.href = "admin/admin.html";
+                    return;
+                }
+
+                // 2. البحث في جدول المستخدمين (users)
+                const userQuery = await db.collection("users").where("password", "==", enteredPass).get();
+                if (!userQuery.empty) {
+                    // إذا كان مستخدم، نأخذ الـ ID الخاص به ونوجهه لصفحته مع الـ ID
+                    const userId = userQuery.docs[0].id;
+                    window.location.href = `tony.html?id=${userId}`;
+                    return;
+                }
+
+                // إذا لم تطابق أي كلمة مرور
+                errorMsg.style.display = "block";
+                submitBtn.textContent = "دخول";
+                submitBtn.disabled = false;
+
+            } catch (error) {
+                console.error("خطأ أثناء التحقق من كلمة المرور:", error);
+                alert("حدث خطأ ما، يجدر المحاولة لاحقاً.");
+                submitBtn.textContent = "دخول";
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

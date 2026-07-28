@@ -3,145 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Gaming</title>
+    <title>admin page</title>
     <link rel="stylesheet" href="../style.css">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0b0e14;
-            color: #ffffff;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 95vh;
-        }
-
-        .title {
-            font-size: 32px;
-            font-weight: 800;
-            color: #00f0ff;
-            text-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
-            margin-bottom: 25px;
-            text-align: center;
-            letter-spacing: 1px;
-        }
-
-        /* صندوق الساعة واليوم بطابع الجيمينج */
-        .gaming-clock-box {
-            background: #151921;
-            border: 2px solid #00f0ff;
-            border-radius: 16px;
-            padding: 25px 35px;
-            box-shadow: 0 0 25px rgba(0, 240, 255, 0.2);
-            margin-bottom: 30px;
+        .live-clock-box {
+            background: white;
+            color: #333;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
             text-align: center;
             width: 100%;
-            max-width: 550px;
-            box-sizing: border-box;
+            max-width: 400px;
         }
-
-        .gaming-clock-box h3 {
-            margin: 0 0 10px 0;
-            color: #a0aabe;
+        .live-clock-box h3 {
+            margin: 0 0 8px 0;
+            color: #2980b9;
             font-size: 18px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
         }
-
-        .day-date {
-            font-size: 22px;
-            font-weight: 600;
-            color: #ff007f;
-            text-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
-            margin-bottom: 10px;
+        .live-clock-box p {
+            margin: 5px 0;
+            font-size: 15px;
         }
-
-        .clock-display {
-            font-size: 36px;
-            font-weight: 900;
-            color: #00ff66;
-            text-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
-            letter-spacing: 2px;
-            font-family: monospace;
-        }
-
-        /* الكارت الرئيسي للأزرار */
-        .main-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            width: 100%;
-            max-width: 550px;
-            background: #151921;
-            padding: 35px;
-            border-radius: 16px;
-            border: 1px solid #2a2f3d;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            box-sizing: border-box;
-        }
-
-        button {
-            width: 100%;
-            padding: 18px;
-            font-size: 20px;
-            font-weight: 800;
+        .fullscreen-btn {
+            background-color: #27ae60;
             color: white;
             border: none;
-            border-radius: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: background 0.3s;
         }
-
-        .btn-management {
-            background: linear-gradient(45deg, #00b4db, #0083b0);
-            box-shadow: 0 0 15px rgba(0, 180, 219, 0.4);
-        }
-
-        .btn-time {
-            background: linear-gradient(45deg, #7928ca, #ff0080);
-            box-shadow: 0 0 15px rgba(255, 0, 128, 0.4);
-        }
-
-        .btn-profile {
-            background: linear-gradient(45deg, #11998e, #38ef7d);
-            box-shadow: 0 0 15px rgba(56, 239, 125, 0.4);
-        }
-
-        button:hover {
-            transform: translateY(-3px) scale(1.02);
-            filter: brightness(1.2);
-        }
-
-        button:active {
-            transform: translateY(1px);
+        .fullscreen-btn:hover {
+            background-color: #219653;
         }
     </style>
 </head>
 <body>
-    <p class="title" id="welcomeText">جاري التحميل...</p>
+    <button class="fullscreen-btn" onclick="toggleFullScreen()">🖥️ وضع ملء الشاشة (Fullscreen)</button>
 
-    <div class="gaming-clock-box">
-        <h3>الوقت والتاريخ الحالي</h3>
-        <div class="day-date" id="currentDayDate">جاري التحديد...</div>
-        <div class="clock-display" id="liveClock">00:00:00 --</div>
+    <p class="title" id="welcomeText">جاري جلب البيانات من البيز...</p>
+
+    <div class="live-clock-box">
+        <h3>الوقت الحالي</h3>
+        <p id="liveClock">--:--:-- --</p>
     </div>
 
-    <div class="main-container">
-        <form action="management.html" method="get">
+    <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 400px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
+     <form action="management.html" method="get">
             <button type="submit" class="btn-management">إدارة الحجوزات</button>
         </form>
         
-        <form action="time.html" method="get">
-            <button type="submit" class="btn-time">مواعيد حجوزات</button>
+        <form id="formTime" action="time.html" method="get">
+            <button type="submit" style="width: 100%; background-color: #2980b9;">مواعيد حجوزات</button>
         </form>
         
-        <form action="profile.html" method="get">
-            <button type="submit" class="btn-profile">Profile</button>
+        <form id="formProfile" action="profile.html" method="get">
+            <button type="submit" style="width: 100%; background-color: #8e44ad;">profile</button>
         </form>
     </div>
 
@@ -159,23 +81,31 @@
             measurementId: "G-YRH69L594N"
         };
 
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.firestore();
+
+        // دالة وضع الفول سكرين (Full Screen)
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`خطأ في تفعيل وضع ملء الشاشة: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
 
         document.addEventListener("DOMContentLoaded", async () => {
             const welcomeText = document.getElementById("welcomeText");
             const liveClockElement = document.getElementById("liveClock");
-            const dayDateElement = document.getElementById("currentDayDate");
 
-            // 1. تشغيل الساعة واليوم والتاريخ
-            function updateClockAndDate() {
+            // 1. تشغيل الساعة الحية
+            function updateClock() {
                 const now = new Date();
-                
-                // عرض اليوم والتاريخ باللغة العربية
-                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                dayDateElement.textContent = now.toLocaleDateString('ar-EG', options);
-
-                // عرض الوقت (ساعات، دقائق، ثواني)
                 let hours = now.getHours();
                 const minutes = String(now.getMinutes()).padStart(2, '0');
                 const seconds = String(now.getSeconds()).padStart(2, '0');
@@ -187,26 +117,85 @@
 
                 liveClockElement.textContent = `${formattedHours}:${minutes}:${seconds} ${ampm}`;
             }
-            setInterval(updateClockAndDate, 1000);
-            updateClockAndDate();
+            setInterval(updateClock, 1000);
+            updateClock();
 
-            // 2. جلب الترحيب بالأدمن من قاعدة البيانات
+            // 2. قراءة بيانات الـ URL لجلب الحساب الدقيق من الفايربيس (البيز)
+            const urlParams = new URLSearchParams(window.location.search);
+            const adminId = urlParams.get("id");
+            const adminPhone = urlParams.get("phone");
+            let adminName = urlParams.get("name");
+
             try {
-                const snapshot = await db.collection("admins")
-                    .orderBy("createdAt", "desc")
-                    .limit(1)
-                    .get();
+                let adminData = null;
 
-                if (!snapshot.empty) {
-                    const data = snapshot.docs[0].data();
-                    welcomeText.textContent = `أهلاً يا ${data.title || ""} ${data.name || ""}`;
+                // أ) البحث في البيز بالـ ID أولاً
+                if (adminId) {
+                    const doc = await db.collection("admins").doc(adminId).get();
+                    if (doc.exists) {
+                        adminData = doc.data();
+                    }
+                }
+
+                // ب) البحث في البيز بالهاتف إذا لم نجد بالـ ID
+                if (!adminData && adminPhone) {
+                    const snap = await db.collection("admins").where("phone", "==", adminPhone.trim()).get();
+                    if (!snap.empty) {
+                        adminData = snap.docs[0].data();
+                    }
+                }
+
+                // ج) استخراج أحدث اسم وثيبيته
+                if (adminData) {
+                    adminName = adminData.name || adminData.adminName || adminData.fullName || adminName;
+                }
+
+                if (adminName && adminName !== "null" && adminName.trim() !== "") {
+                    welcomeText.textContent = `أهلاً يا ${decodeURIComponent(adminName)}`;
                 } else {
                     welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
                 }
+
             } catch (error) {
-                console.error("خطأ في جلب بيانات الأدمن:", error);
-                welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
+                console.error("خطأ جلب البيانات من البيز:", error);
+                if (adminName) {
+                    welcomeText.textContent = `أهلاً يا ${decodeURIComponent(adminName)}`;
+                } else {
+                    welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
+                }
             }
+
+            // 3. ربط الـ Forms ببيانات البيز الصحيحة
+            function setFormInputs(formId) {
+                const form = document.getElementById(formId);
+                if (form) {
+                    if (adminName) {
+                        const inputName = document.createElement("input");
+                        inputName.type = "hidden";
+                        inputName.name = "name";
+                        inputName.value = adminName;
+                        form.appendChild(inputName);
+                    }
+                    if (adminPhone) {
+                        const inputPhone = document.createElement("input");
+                        inputPhone.type = "hidden";
+                        inputPhone.name = "phone";
+                        inputPhone.value = adminPhone;
+                        form.appendChild(inputPhone);
+                    }
+                    if (adminId) {
+                        const inputId = document.createElement("input");
+                        inputId.type = "hidden";
+                        inputId.name = "id";
+                        inputId.value = adminId;
+                        form.appendChild(inputId);
+                    }
+                }
+            }
+
+            setFormInputs("formManagement");
+            setFormInputs("formTime");
+            setFormInputs("formProfile");
         });
     </script>
 </body>

@@ -26,27 +26,10 @@
             margin: 5px 0;
             font-size: 15px;
         }
-        .fullscreen-btn {
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            transition: background 0.3s;
-        }
-        .fullscreen-btn:hover {
-            background-color: #219653;
-        }
     </style>
 </head>
 <body>
-    <button class="fullscreen-btn" onclick="toggleFullScreen()">🖥️ وضع ملء الشاشة (Fullscreen)</button>
-
-    <p class="title" id="welcomeText">جاري جلب البيانات من البيز...</p>
+    <p class="title" id="welcomeText">جاري التحميل...</p>
 
     <div class="live-clock-box">
         <h3>الوقت الحالي</h3>
@@ -54,15 +37,15 @@
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 400px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
-     <form action="management.html" method="get">
-            <button type="submit" class="btn-management">إدارة الحجوزات</button>
+        <form action="managment.html" method="get">
+            <button type="submit" style="width: 100%;">إدارة الحجوزات</button>
         </form>
         
-        <form id="formTime" action="time.html" method="get">
+        <form action="time.html" method="get">
             <button type="submit" style="width: 100%; background-color: #2980b9;">مواعيد حجوزات</button>
         </form>
         
-        <form id="formProfile" action="profile.html" method="get">
+        <form action="profile.html" method="get">
             <button type="submit" style="width: 100%; background-color: #8e44ad;">profile</button>
         </form>
     </div>
@@ -81,29 +64,14 @@
             measurementId: "G-YRH69L594N"
         };
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
-        // دالة وضع الفول سكرين (Full Screen)
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    alert(`خطأ في تفعيل وضع ملء الشاشة: ${err.message}`);
-                });
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-            }
-        }
 
         document.addEventListener("DOMContentLoaded", async () => {
             const welcomeText = document.getElementById("welcomeText");
             const liveClockElement = document.getElementById("liveClock");
 
-            // 1. تشغيل الساعة الحية
+            // 1. تشغيل الساعة الحية (ساعات، دقائق، ثواني مع AM/PM)
             function updateClock() {
                 const now = new Date();
                 let hours = now.getHours();
@@ -112,7 +80,7 @@
                 const ampm = hours >= 12 ? 'PM' : 'AM';
                 
                 hours = hours % 12;
-                hours = hours ? hours : 12;
+                hours = hours ? hours : 12; // الساعة 0 تصبح 12
                 const formattedHours = String(hours).padStart(2, '0');
 
                 liveClockElement.textContent = `${formattedHours}:${minutes}:${seconds} ${ampm}`;
@@ -120,82 +88,23 @@
             setInterval(updateClock, 1000);
             updateClock();
 
-            // 2. قراءة بيانات الـ URL لجلب الحساب الدقيق من الفايربيس (البيز)
-            const urlParams = new URLSearchParams(window.location.search);
-            const adminId = urlParams.get("id");
-            const adminPhone = urlParams.get("phone");
-            let adminName = urlParams.get("name");
-
+            // 2. جلب الترحيب بالأدمن من قاعدة البيانات
             try {
-                let adminData = null;
+                const snapshot = await db.collection("admins")
+                    .orderBy("createdAt", "desc")
+                    .limit(1)
+                    .get();
 
-                // أ) البحث في البيز بالـ ID أولاً
-                if (adminId) {
-                    const doc = await db.collection("admins").doc(adminId).get();
-                    if (doc.exists) {
-                        adminData = doc.data();
-                    }
-                }
-
-                // ب) البحث في البيز بالهاتف إذا لم نجد بالـ ID
-                if (!adminData && adminPhone) {
-                    const snap = await db.collection("admins").where("phone", "==", adminPhone.trim()).get();
-                    if (!snap.empty) {
-                        adminData = snap.docs[0].data();
-                    }
-                }
-
-                // ج) استخراج أحدث اسم وثيبيته
-                if (adminData) {
-                    adminName = adminData.name || adminData.adminName || adminData.fullName || adminName;
-                }
-
-                if (adminName && adminName !== "null" && adminName.trim() !== "") {
-                    welcomeText.textContent = `أهلاً يا ${decodeURIComponent(adminName)}`;
+                if (!snapshot.empty) {
+                    const data = snapshot.docs[0].data();
+                    welcomeText.textContent = `أهلاً يا ${data.title || ""} ${data.name || ""}`;
                 } else {
                     welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
                 }
-
             } catch (error) {
-                console.error("خطأ جلب البيانات من البيز:", error);
-                if (adminName) {
-                    welcomeText.textContent = `أهلاً يا ${decodeURIComponent(adminName)}`;
-                } else {
-                    welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
-                }
+                console.error("خطأ في جلب بيانات الأدمن:", error);
+                welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
             }
-
-            // 3. ربط الـ Forms ببيانات البيز الصحيحة
-            function setFormInputs(formId) {
-                const form = document.getElementById(formId);
-                if (form) {
-                    if (adminName) {
-                        const inputName = document.createElement("input");
-                        inputName.type = "hidden";
-                        inputName.name = "name";
-                        inputName.value = adminName;
-                        form.appendChild(inputName);
-                    }
-                    if (adminPhone) {
-                        const inputPhone = document.createElement("input");
-                        inputPhone.type = "hidden";
-                        inputPhone.name = "phone";
-                        inputPhone.value = adminPhone;
-                        form.appendChild(inputPhone);
-                    }
-                    if (adminId) {
-                        const inputId = document.createElement("input");
-                        inputId.type = "hidden";
-                        inputId.name = "id";
-                        inputId.value = adminId;
-                        form.appendChild(inputId);
-                    }
-                }
-            }
-
-            setFormInputs("formManagement");
-            setFormInputs("formTime");
-            setFormInputs("formProfile");
         });
     </script>
 </body>

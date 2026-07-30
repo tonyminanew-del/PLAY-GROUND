@@ -201,7 +201,7 @@
                 const username = document.getElementById("adminUsername").value.trim();
                 const password = document.getElementById("adminPassword").value.trim();
                 const phone = document.getElementById("adminPhone").value.trim();
-                const church = document.getElementById("adminChurch").value.trim(); // جلب اسم الكنيسة
+                const church = document.getElementById("adminChurch").value.trim();
                 const title = document.getElementById("adminTitle").value;
 
                 if (username === "" || password === "" || phone === "" || church === "") {
@@ -214,15 +214,16 @@
                 messageDiv.textContent = "جاري التحقق من البيانات...";
 
                 try {
+                    // البحث في قاعدة البيانات عن حقل phone بدلاً من username
                     const snapshot = await db.collection("admins")
-                        .where("username", "==", username)
+                        .where("phone", "==", phone)
                         .get();
 
                     if (!snapshot.empty) {
                         messageDiv.style.color = "#ff7675";
-                        messageDiv.textContent = "اسم المستخدم هذا مُستخدم بالفعل، اختر اسماً آخر!";
+                        messageDiv.textContent = "رقم الهاتف هذا مُسجل بالفعل، يرجى استخدام رقم آخر!";
                     } else {
-                        // إرسال البيانات بما فيها حقل الكنيسة (church) إلى Firebase
+                        // إرسال البيانات بما فيها حقل الكنيسة إلى Firebase
                         await db.collection("admins").add({
                             username: username,
                             password: password,

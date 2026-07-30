@@ -49,7 +49,9 @@
 
         document.addEventListener("DOMContentLoaded", async () => {
             const urlParams = new URLSearchParams(window.location.search);
-            let userId = urlParams.get("id");
+            
+            // قراءة المعرّف من رابط الصفحة أو من الـ localStorage الخاصة بالمسجّل
+            let userId = urlParams.get("id") || localStorage.getItem("loggedInUserId");
 
             try {
                 let userData = null;
@@ -60,19 +62,6 @@
                     const userDoc = await userRef.get();
                     if (userDoc.exists) {
                         userData = userDoc.data();
-                    }
-                }
-
-                if (!userData) {
-                    const snapshot = await db.collection("users")
-                        .orderBy("createdAt", "desc")
-                        .limit(1)
-                        .get();
-
-                    if (!snapshot.empty) {
-                        userId = snapshot.docs[0].id;
-                        userRef = snapshot.docs[0].ref;
-                        userData = snapshot.docs[0].data();
                     }
                 }
 
@@ -94,15 +83,16 @@
                     // عرض كلمة المرور
                     document.getElementById("profilePassword").textContent = password || "-";
                 } else {
-                    document.getElementById("profileName").textContent = "لا يوجد بيانات";
-                    document.getElementById("profileChurch").textContent = "لا يوجد بيانات";
-                    document.getElementById("profilePhone").textContent = "لا يوجد بيانات";
+                    document.getElementById("profileName").textContent = "لم يتم العثور على الحساب";
+                    document.getElementById("profileChurch").textContent = "-";
+                    document.getElementById("profilePhone").textContent = "-";
                     document.getElementById("profilePassword").textContent = "-";
                 }
             } catch (error) {
                 console.error("خطأ في جلب بيانات البروفايل:", error);
                 document.getElementById("profileName").textContent = "تعذر الجلب";
                 document.getElementById("profileChurch").textContent = "تعذر الجلب";
+                document.getElementById("profilePhone").textContent = "تعذر الجلب";
                 document.getElementById("profilePassword").textContent = "-";
             }
 
@@ -114,6 +104,7 @@
             // زر تسجيل الخروج
             const logoutBtn = document.getElementById("logoutBtn");
             logoutBtn.addEventListener("click", () => {
+                localStorage.removeItem("loggedInUserId"); // مسح معرف المستخدم المسجل
                 alert("تم تسجيل الخروج بنجاح.");
                 window.location.href = "../index.html";
             });

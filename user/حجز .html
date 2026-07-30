@@ -15,14 +15,15 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
+            padding: 20px 0;
         }
         .container {
             width: 100%;
             max-width: 450px;
             background: white;
             color: #333;
-            padding: 30px;
+            padding: 25px;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             display: flex;
@@ -35,7 +36,22 @@
             font-weight: bold;
             text-align: center;
             color: #2c3e50;
-            margin: 0 0 10px 0;
+            margin: 0 0 5px 0;
+        }
+        .user-info-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px 15px;
+            text-align: center;
+            color: #2c3e50;
+        }
+        .user-info-card p {
+            margin: 4px 0;
+            font-size: 14px;
+        }
+        .user-info-card strong {
+            color: #27ae60;
         }
         .input-group {
             display: flex;
@@ -60,7 +76,103 @@
         input:focus, select:focus {
             border-color: #27ae60;
         }
-        button {
+        
+        .payment-section {
+            border-top: 2px dashed #eee;
+            padding-top: 12px;
+            margin-top: 5px;
+        }
+        .payment-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            text-align: right;
+        }
+        .payment-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .payment-btn {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: #f8fafc;
+            color: #333;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .payment-btn.active {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+        }
+        .instapay-box {
+            display: none;
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 13px;
+            color: #334155;
+            margin-top: 8px;
+        }
+        .store-links {
+            display: flex;
+            gap: 6px;
+            margin: 8px 0;
+        }
+        .store-btn {
+            flex: 1;
+            padding: 8px;
+            background: #0f172a;
+            color: #fff;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .phone-badge {
+            display: block;
+            text-align: center;
+            background: #e0f2fe;
+            color: #0369a1;
+            font-weight: bold;
+            padding: 6px;
+            border-radius: 6px;
+            direction: ltr;
+            margin: 6px 0;
+            font-size: 15px;
+        }
+
+        .notice-banner {
+            background: #fff3cd;
+            border: 2px solid #ffeba2;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .notice-banner p {
+            margin: 0;
+            color: #856404;
+            font-size: 13px;
+            font-weight: bold;
+            line-height: 1.5;
+        }
+        .notice-banner span {
+            display: block;
+            font-size: 15px;
+            color: #d39e00;
+            margin-top: 4px;
+        }
+
+        button[type="submit"] {
             background-color: #27ae60;
             color: white;
             border: none;
@@ -72,21 +184,23 @@
             width: 100%;
             transition: background 0.3s;
         }
-        button:hover {
+        button[type="submit"]:hover {
             background-color: #219653;
         }
         .back-btn {
             background-color: #7f8c8d;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
             margin-top: 5px;
         }
         .back-btn:hover {
             background-color: #616a6b;
-        }
-        #welcomeUser {
-            text-align: center;
-            color: #e67e22;
-            font-size: 15px;
-            font-weight: bold;
         }
     </style>
 </head>
@@ -94,7 +208,11 @@
 
     <div class="container">
         <p class="title">حجز موعد للملعب</p>
-        <p id="welcomeUser">جاري التحقق من قاعدة البيانات...</p>
+
+        <div class="user-info-card">
+            <p id="welcomeUser">جاري التحقق من البيانات...</p>
+            <p id="userPhoneDisplay" style="display: none;">رقم الهاتف: <strong id="userPhoneVal">-</strong></p>
+        </div>
         
         <form id="bookingForm">
             <div class="input-group">
@@ -109,12 +227,33 @@
                 </select>
             </div>
 
-            <button type="submit" style="margin-top: 10px;">تأكيد وحجز الموعد</button>
+            <div class="payment-section">
+                <div class="payment-title">طريقة الدفع (رسوم الحجز: 200 ج):</div>
+                <div class="payment-options">
+                    <button type="button" class="payment-btn active" id="btnCash" onclick="setPaymentMethod('cash')">🏟️ الدفع في الملعب</button>
+                    <button type="button" class="payment-btn" id="btnInsta" onclick="setPaymentMethod('instapay')">💳 InstaPay</button>
+                </div>
+
+                <div id="instapayBox" class="instapay-box">
+                    <p style="margin: 0; font-weight: bold; color: #0369a1;">فتح المتجر:</p>
+                    <div class="store-links">
+                        <a href="https://play.google.com/store" target="_blank" class="store-btn">Google Play Store 🎮</a>
+                    </div>
+                    <p style="margin: 5px 0 0 0;">حول <strong>200 جنيه</strong> على الرقم:</p>
+                    <span class="phone-badge">+20 12 00890168</span>
+
+                    <div class="notice-banner">
+                        <p>⚠️ <strong>خطوة هامة جداً:</strong></p>
+                        <span>📸 عند فتح الواتساب، يُرجى إرفاق صورة إيصال التحويل (Screenshot) مع الرسالة لتأكيد الحجز.</span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" style="margin-top: 10px;">تأكيد وحجز الموعد 🚀</button>
             <button type="button" id="backBtn" class="back-btn">العودة للرئيسية</button>
         </form>
     </div>
 
-    <!-- استدعاء مكتبات فايربيس -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
@@ -132,7 +271,9 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // الساعات الكاملة من 3 ظهراً إلى 12 منتصف الليل
+        let selectedPaymentMethod = 'cash';
+        let currentUserData = { name: '', phone: '' };
+
         const allTimeSlots = [
             "03:00 PM - 04:00 PM",
             "04:00 PM - 05:00 PM",
@@ -144,6 +285,23 @@
             "10:00 PM - 11:00 PM",
             "11:00 PM - 12:00 AM"
         ];
+
+        function setPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            const instapayBox = document.getElementById('instapayBox');
+            const btnCash = document.getElementById('btnCash');
+            const btnInsta = document.getElementById('btnInsta');
+
+            if (method === 'instapay') {
+                instapayBox.style.display = 'block';
+                btnInsta.classList.add('active');
+                btnCash.classList.remove('active');
+            } else {
+                instapayBox.style.display = 'none';
+                btnCash.classList.add('active');
+                btnInsta.classList.remove('active');
+            }
+        }
 
         document.addEventListener("DOMContentLoaded", async () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -170,20 +328,21 @@
                 const userDoc = await db.collection("users").doc(userId).get();
                 if (userDoc.exists) {
                     const userData = userDoc.data();
-                    document.getElementById("welcomeUser").textContent = `أهلاً بك يا ${userData.name || userData.userName || 'صديقي'}`;
-                } else {
-                    document.getElementById("welcomeUser").textContent = "أهلاً بك يا صديقي";
+                    currentUserData.name = userData.name || userData.username || 'مستخدم';
+                    currentUserData.phone = userData.phone || 'غير مسجل';
+
+                    document.getElementById("welcomeUser").innerHTML = `أهلاً بك يا <strong>${currentUserData.name}</strong>`;
+                    document.getElementById("userPhoneVal").textContent = currentUserData.phone;
+                    document.getElementById("userPhoneDisplay").style.display = "block";
                 }
 
                 const dateInput = document.getElementById("bookingDate");
                 const timeSelect = document.getElementById("bookingTime");
 
-                // تحديث الساعات المتاحة بناءً على التاريخ الذي يختاره المستخدم
                 dateInput.addEventListener("change", async () => {
                     const selectedDate = dateInput.value;
                     timeSelect.innerHTML = '<option value="">جاري تحميل المواعيد المتاحة...</option>';
 
-                    // جلب الحجوزات المسجلة مسبقاً في هذا التاريخ
                     const snapshot = await db.collection("bookings").where("date", "==", selectedDate).get();
                     let bookedSlots = [];
                     snapshot.forEach(doc => {
@@ -192,7 +351,6 @@
 
                     timeSelect.innerHTML = '<option value="">اختر الوقت المناسب</option>';
                     
-                    // تصفية الساعات وإظهار الفارغة فقط
                     allTimeSlots.forEach(slot => {
                         if (!bookedSlots.includes(slot)) {
                             const option = document.createElement("option");
@@ -208,6 +366,7 @@
                 });
 
                 const bookingForm = document.getElementById("bookingForm");
+                const submitBtn = document.getElementById("submitBtn");
                 
                 bookingForm.addEventListener("submit", async (e) => {
                     e.preventDefault();
@@ -219,28 +378,38 @@
                         return;
                     }
 
-                    // التحقق المزدوج اللحظي لمنع حجز نفس الموعد إذا سبقه شخص آخر قبل ثوانٍ
-                    const checkSnapshot = await db.collection("bookings")
-                        .where("date", "==", date)
-                        .where("time", "==", time)
-                        .get();
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = "جاري الحفظ والتحويل...";
 
-                    if (!checkSnapshot.empty) {
-                        alert("عفواً، المعاد اتحجز خلاص من مستخدم آخر! اختر موعداً آخر.");
-                        location.reload();
-                        return;
-                    }
-
-                    // حفظ الحجز في قاعدة البيانات
                     await db.collection("bookings").add({
                         userId: userId,
+                        userName: currentUserData.name,
+                        userPhone: currentUserData.phone,
                         date: date,
                         time: time,
+                        paymentMethod: selectedPaymentMethod,
+                        amount: 200,
                         createdAt: new Date()
                     });
 
-                    alert("تم حجز الملعب بنجاح !");
-                    window.location.href = `tony.html?id=${userId}`;
+                    const paymentText = selectedPaymentMethod === 'instapay' ? 'InstaPay' : 'الدفع في الملعب';
+                    
+                    let messageText = `⚽ *حجز جديد - ملعب مارجرجس* ⚽%0A%0A` +
+                                      `👤 *الاسم:* ${encodeURIComponent(currentUserData.name)}%0A` +
+                                      `📞 *رقم الهاتف:* ${encodeURIComponent(currentUserData.phone)}%0A` +
+                                      `📅 *التاريخ:* ${date}%0A` +
+                                      `⏰ *الوقت:* ${encodeURIComponent(time)}%0A` +
+                                      `💳 *طريقة الدفع:* ${encodeURIComponent(paymentText)}%0A` +
+                                      `💰 *المبلغ:* 200 جنيه`;
+
+                    const whatsappNumber = "201200890168";
+                    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${messageText}`;
+
+                    window.open(whatsappUrl, '_blank');
+
+                    setTimeout(() => {
+                        window.location.href = `tony.html?id=${userId}`;
+                    }, 1000);
                 });
 
                 document.getElementById("backBtn").addEventListener("click", () => {
@@ -249,7 +418,9 @@
 
             } catch (error) {
                 console.error("خطأ في الاتصال بقاعدة البيانات:", error);
-                document.getElementById("welcomeUser").textContent = "حدث خطأ في جلب بيانات المستخدم";
+                alert("حدث خطأ، يرجى المحاولة مرة أخرى.");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "تأكيد وحجز الموعد 🚀";
             }
         });
     </script>

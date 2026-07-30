@@ -4,29 +4,140 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تسجيل دخول الأدمن</title>
-    <link rel="stylesheet" href="../style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e1e2e 0%, #2a2a40 100%);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: rgba(43, 43, 61, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            padding: 35px 30px;
+            width: 100%;
+            max-width: 400px;
+            backdrop-filter: blur(10px);
+        }
+
+        .title {
+            color: #00d2d3;
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 25px;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            text-align: right;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #c8d6e5;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="tel"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #485460;
+            border-radius: 8px;
+            background-color: #1e1e2e;
+            color: #ffffff;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #00d2d3;
+            box-shadow: 0 0 8px rgba(0, 210, 211, 0.3);
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #00d2d3 0%, #00a8a9 100%);
+            color: #1e1e2e;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 210, 211, 0.4);
+        }
+
+        #message {
+            margin-top: 18px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            min-height: 20px;
+        }
+    </style>
 </head>
 <body>
-    <p class="title">تسجيل دخول لوحة التحكم </p>
 
-    <form id="adminForm">
-        <label for="adminName">الاسم:</label>
-        <input type="text" id="adminName" required placeholder="اكتب اسمك...">
+    <div class="login-card">
+        <p class="title">تسجيل دخول لوحة التحكم</p>
 
-        <label for="adminPhone">رقم الهاتف:</label>
-        <input type="tel" id="adminPhone" required placeholder="اكتب رقم هاتفك...">
+        <form id="adminForm">
+            <div class="form-group">
+                <label for="adminUsername">اسم المستخدم (Username):</label>
+                <input type="text" id="adminUsername" required placeholder="اكتب اسم المستخدم...">
+            </div>
 
-        <label for="adminTitle">اللقب / الوصف:</label>
-        <select id="adminTitle">
-            <option value="اخ">اخ</option>
-            <option value="تاسوني">تاسوني</option>
-            <option value="ابونا">ابونا</option>
-        </select>
+            <div class="form-group">
+                <label for="adminPassword">كلمة السر (Password):</label>
+                <input type="password" id="adminPassword" required placeholder="اكتب كلمة السر...">
+            </div>
 
-        <button type="submit">دخول</button>
-    </form>
+            <div class="form-group">
+                <label for="adminPhone">رقم الهاتف:</label>
+                <input type="tel" id="adminPhone" required placeholder="اكتب رقم هاتفك...">
+            </div>
 
-    <!-- استدعاء مكتبات فايربيس -->
+            <div class="form-group">
+                <label for="adminTitle">اللقب / الوصف:</label>
+                <select id="adminTitle">
+                    <option value="اخ">اخ</option>
+                    <option value="تاسوني">تاسوني</option>
+                    <option value="ابونا">ابونا</option>
+                </select>
+            </div>
+
+            <button type="submit">دخول</button>
+        </form>
+
+        <div id="message"></div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
@@ -46,38 +157,64 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             const adminForm = document.getElementById("adminForm");
-            const nameInput = document.getElementById("adminName");
+            const usernameInput = document.getElementById("adminUsername");
+            const passwordInput = document.getElementById("adminPassword");
             const phoneInput = document.getElementById("adminPhone");
             const titleSelect = document.getElementById("adminTitle");
+            const messageDiv = document.getElementById("message");
 
             if (!adminForm) return;
 
             adminForm.addEventListener("submit", async (event) => {
                 event.preventDefault();
 
-                const name = nameInput.value.trim();
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value.trim();
                 const phone = phoneInput.value.trim();
                 const title = titleSelect.value;
 
-                if (name !== "" && phone !== "") {
-                    try {
-                        // حفظ البيانات مباشرة في مجموعة admins في فايربيس
+                if (username === "" || password === "" || phone === "") {
+                    messageDiv.style.color = "#ff7675";
+                    messageDiv.textContent = "يرجى ملء جميع الحقول المطلوبة!";
+                    return;
+                }
+
+                messageDiv.style.color = "#00d2d3";
+                messageDiv.textContent = "جاري التحقق من البيانات...";
+
+                try {
+                    // 1. التحقق إذا كان اسم المستخدم مستخدماً من قبل في كولكشن admins
+                    const snapshot = await db.collection("admins")
+                        .where("username", "==", username)
+                        .get();
+
+                    if (!snapshot.empty) {
+                        // إذا وُجد اسم المستخدم بالفعل
+                        messageDiv.style.color = "#ff7675";
+                        messageDiv.textContent = "اسم المستخدم هذا مُستخدم بالفعل، اختر اسماً آخر!";
+                    } else {
+                        // 2. إدخال البيانات في كولكشن admins شاملة كلمة السر واللقب
                         await db.collection("admins").add({
-                            name: name,
+                            username: username,
+                            password: password,
                             phone: phone,
                             title: title,
                             createdAt: new Date()
                         });
 
-                        // الانتقال المباشر للوحة التحكم
-                        window.location.href = "admin.html";
-                        
-                    } catch (error) {
-                        console.error("خطأ أثناء حفظ البيانات: ", error);
-                        alert("حدث خطأ في الاتصال بقاعدة البيانات، يرجى المحاولة مرة أخرى.");
+                        messageDiv.style.color = "#55efc4";
+                        messageDiv.textContent = "تم التسجيل بنجاح! جاري التوجيه...";
+
+                        // 3. التوجيه المباشر بعد ثانية إلى admin.html
+                        setTimeout(() => {
+                            window.location.href = "admin.html";
+                        }, 1000);
                     }
-                } else {
-                    alert("يرجى إدخال الاسم ورقم الهاتف بشكل صحيح!");
+                    
+                } catch (error) {
+                    console.error("خطأ أثناء الاتصال بقاعدة البيانات: ", error);
+                    messageDiv.style.color = "#ff7675";
+                    messageDiv.textContent = "حدث خطأ في الاتصال بقاعدة البيانات!";
                 }
             });
         });

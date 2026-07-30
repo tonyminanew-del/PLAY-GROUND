@@ -1,0 +1,9 @@
+body {
+    background-image: url('Tony.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: #ffffff;
+    min-height: 100vh;
+}

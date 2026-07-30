@@ -1,254 +1,228 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل دخول الأدمن</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إنشاء حساب جديد</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Tajawal', sans-serif;
+    }
 
-        body {
-            background: linear-gradient(135deg, #1e1e2e 0%, #2a2a40 100%);
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
+    body {
+      background: linear-gradient(135deg, #0f0c20 0%, #1e1b4b 100%);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
 
-        .login-card {
-            background: rgba(43, 43, 61, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-            padding: 35px 30px;
-            width: 100%;
-            max-width: 400px;
-            backdrop-filter: blur(10px);
-        }
+    .dialog-box {
+      background: rgba(30, 27, 75, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
 
-        .title {
-            color: #00d2d3;
-            font-size: 22px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 25px;
-            letter-spacing: 0.5px;
-        }
+    .dialog-titlebar {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 25px;
+      color: #6366f1;
+      text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+    }
 
-        .form-group {
-            margin-bottom: 18px;
-            text-align: right;
-        }
+    .input-group {
+      margin-bottom: 15px;
+      text-align: right;
+    }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: #c8d6e5;
-        }
+    .input-field {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      background-color: rgba(15, 12, 32, 0.5);
+      color: #fff;
+      font-size: 15px;
+      transition: all 0.3s ease;
+    }
 
-        input[type="text"],
-        input[type="password"],
-        input[type="tel"],
-        select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #485460;
-            border-radius: 8px;
-            background-color: #1e1e2e;
-            color: #ffffff;
-            font-size: 15px;
-            transition: all 0.3s ease;
-        }
+    .input-field::placeholder {
+      color: #94a3b8;
+    }
 
-        input:focus, select:focus {
-            outline: none;
-            border-color: #00d2d3;
-            box-shadow: 0 0 8px rgba(0, 210, 211, 0.3);
-        }
+    .input-field:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+      background-color: rgba(15, 12, 32, 0.8);
+    }
 
-        button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #00d2d3 0%, #00a8a9 100%);
-            color: #1e1e2e;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 210, 211, 0.4);
-        }
+    .primary {
+      background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
 
-        #message {
-            margin-top: 18px;
-            font-size: 14px;
-            font-weight: bold;
-            text-align: center;
-            min-height: 20px;
-        }
+    .primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+      background: linear-gradient(90deg, #4f46e5 0%, #4338ca 100%);
+    }
 
-        /* إخفاء النموذج الرئيسي في البداية */
-        #adminForm {
-            display: none;
-        }
-    </style>
+    .primary:active {
+      transform: translateY(0);
+    }
+
+    #message {
+      margin-top: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      min-height: 20px;
+      transition: color 0.3s ease;
+    }
+  </style>
 </head>
-<body>
+<body> 
 
-    <div class="login-card">
-        <p class="title">تسجيل دخول لوحة التحكم</p>
+  <div class="dialog-box">
+    <div class="dialog-titlebar">
+      <span>إنشاء حساب جديد</span>
+    </div> 
 
-        <div id="accessStep">
-            <div class="form-group">
-                <label for="accessPassword">أدخل كلمة المرور لدخول اللوحة:</label>
-                <input type="password" id="accessPassword" placeholder="اكتب كلمة السر هنا...">
-            </div>
-            <button type="button" id="verifyBtn">تأكيد كلمة السر</button>
+    <form id="registerForm" action="tony.html" method="POST">
+      <div class="dialog-content">
+        <div class="input-group">
+          <input 
+            type="text" 
+            id="username" 
+            name="username"
+            class="input-field" 
+            placeholder="اسم المستخدم" 
+            required
+          >
         </div>
+        <div class="input-group">
+          <input 
+            type="password" 
+            id="password" 
+            name="password"
+            class="input-field" 
+            placeholder="كلمة السر" 
+            required
+          >
+        </div>
+        <div class="input-group">
+          <input 
+            type="tel" 
+            id="phone" 
+            name="phone"
+            class="input-field" 
+            placeholder="رقم الهاتف (اختياري)" 
+          >
+        </div>
+      </div> 
 
-        <form id="adminForm">
-            <div class="form-group">
-                <label for="adminUsername">اسم المستخدم (Username):</label>
-                <input type="text" id="adminUsername" required placeholder="اكتب اسم المستخدم...">
-            </div>
+      <div class="dialog-buttons">
+        <button type="submit" class="btn primary">تسجيل حساب</button>
+      </div>
+    </form> 
 
-            <div class="form-group">
-                <label for="adminPassword">كلمة السر الخاصة بك (Password):</label>
-                <input type="password" id="adminPassword" required placeholder="اكتب كلمة السر...">
-            </div>
+    <div id="message"></div>
+  </div> 
 
-            <div class="form-group">
-                <label for="adminPhone">رقم الهاتف:</label>
-                <input type="tel" id="adminPhone" required placeholder="اكتب رقم هاتفك...">
-            </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"; 
 
-            <div class="form-group">
-                <label for="adminChurch">اسم الكنيسة:</label>
-                <input type="text" id="adminChurch" required placeholder="اكتب اسم الكنيسة...">
-            </div>
+    // إعدادات Firebase الخاصة بك
+    const firebaseConfig = {
+      apiKey: "AIzaSyBGM0xBeu0wc2JV_4hgymDMDi1jlltf8SI",
+      authDomain: "marygrgs.firebaseapp.com",
+      projectId: "marygrgs",
+      storageBucket: "marygrgs.firebasestorage.app",
+      messagingSenderId: "866893606556",
+      appId: "1:866893606556:web:d2b7bab1c8dcd8fd038759",
+      measurementId: "G-YRH69L594N"
+    }; 
 
-            <div class="form-group">
-                <label for="adminTitle">اللقب / الوصف:</label>
-                <select id="adminTitle">
-                    <option value="اخ">اخ</option>
-                    <option value="تاسوني">تاسوني</option>
-                    <option value="ابونا">ابونا</option>
-                </select>
-            </div>
+    // تهيئة Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app); 
 
-            <button type="submit">دخول</button>
-        </form>
+    const registerForm = document.getElementById('registerForm');
+    const messageDiv = document.getElementById('message'); 
 
-        <div id="message"></div>
-    </div>
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault(); 
 
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+      const usernameInput = document.getElementById('username').value.trim();
+      const passwordInput = document.getElementById('password').value.trim();
+      const phoneInput = document.getElementById('phone').value.trim(); 
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBGM0xBeu0wc2JV_4hgymDMDi1jlltf8SI",
-            authDomain: "marygrgs.firebaseapp.com",
-            projectId: "marygrgs",
-            storageBucket: "marygrgs.firebasestorage.app",
-            messagingSenderId: "866893606556",
-            appId: "1:866893606556:web:d2b7bab1c8dcd8fd038759",
-            measurementId: "G-YRH69L594N"
-        };
+      messageDiv.style.color = "#818cf8";
+      messageDiv.textContent = "جاري التحقق من اسم المستخدم..."; 
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+      try {
+        const usersRef = collection(db, "users"); 
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const accessStep = document.getElementById("accessStep");
-            const accessPassword = document.getElementById("accessPassword");
-            const verifyBtn = document.getElementById("verifyBtn");
-            const adminForm = document.getElementById("adminForm");
-            const messageDiv = document.getElementById("message");
+        // 1. التحقق إذا كان الاسم موجوداً بالفعل في الكولكشن
+        const checkQuery = query(usersRef, where("name", "==", usernameInput));
+        const querySnapshot = await getDocs(checkQuery); 
 
-            // 1. التحقق من كلمة السر الرئيسية لإظهار الأسئلة
-            verifyBtn.addEventListener("click", () => {
-                const enteredKey = accessPassword.value.trim();
+        if (!querySnapshot.empty) {
+          // الاسم موجود بالفعل - يرفض التسجيل
+          messageDiv.style.color = "#f87171";
+          messageDiv.textContent = "اسم المستخدم هذا مُستخدم بالفعل، اختر اسماً آخر!";
+        } else {
+          // 2. حفظ البيانات في Firebase
+          await addDoc(usersRef, {
+            name: usernameInput,
+            password: passwordInput,
+            phone: phoneInput || "",
+            createdAt: new Date()
+          }); 
 
-                if (enteredKey === "TONY@CONTROL2026") {
-                    accessStep.style.display = "none";
-                    adminForm.style.display = "block";
-                    messageDiv.textContent = "";
-                } else {
-                    messageDiv.style.color = "#ff7675";
-                    messageDiv.textContent = "كلمة السر غير صحيحة!";
-                }
-            });
+          messageDiv.style.color = "#4ade80";
+          messageDiv.textContent = "تم التسجيل بنجاح! جاري التوجيه..."; 
 
-            // 2. معالجة إرسال البيانات بعد إظهار الأسئلة
-            adminForm.addEventListener("submit", async (event) => {
-                event.preventDefault();
+          // 3. التحويل إلى صفحة tony.html بعد النجاح
+          setTimeout(() => {
+            window.location.href = "tony.html";
+          }, 1000);
+        } 
 
-                const username = document.getElementById("adminUsername").value.trim();
-                const password = document.getElementById("adminPassword").value.trim();
-                const phone = document.getElementById("adminPhone").value.trim();
-                const church = document.getElementById("adminChurch").value.trim(); // جلب اسم الكنيسة
-                const title = document.getElementById("adminTitle").value;
-
-                if (username === "" || password === "" || phone === "" || church === "") {
-                    messageDiv.style.color = "#ff7675";
-                    messageDiv.textContent = "يرجى ملء جميع الحقول المطلوبة!";
-                    return;
-                }
-
-                messageDiv.style.color = "#00d2d3";
-                messageDiv.textContent = "جاري التحقق من البيانات...";
-
-                try {
-                    const snapshot = await db.collection("admins")
-                        .where("username", "==", username)
-                        .get();
-
-                    if (!snapshot.empty) {
-                        messageDiv.style.color = "#ff7675";
-                        messageDiv.textContent = "اسم المستخدم هذا مُستخدم بالفعل، اختر اسماً آخر!";
-                    } else {
-                        // إرسال البيانات بما فيها حقل الكنيسة (church) إلى Firebase
-                        await db.collection("admins").add({
-                            username: username,
-                            password: password,
-                            phone: phone,
-                            church: church,
-                            title: title,
-                            createdAt: new Date()
-                        });
-
-                        localStorage.setItem("adminUsername", username);
-                        localStorage.setItem("adminTitle", title);
-
-                        messageDiv.style.color = "#55efc4";
-                        messageDiv.textContent = "تم التسجيل بنجاح! جاري التوجيه...";
-
-                        setTimeout(() => {
-                            window.location.href = `admin.html?username=${encodeURIComponent(username)}`;
-                        }, 1000);
-                    }
-                } catch (error) {
-                    console.error("خطأ أثناء الاتصال بقاعدة البيانات: ", error);
-                    messageDiv.style.color = "#ff7675";
-                    messageDiv.textContent = "حدث خطأ في الاتصال بقاعدة البيانات!";
-                }
-            });
-        });
-    </script>
+      } catch (error) {
+        console.error("Error adding user: ", error);
+        messageDiv.style.color = "#f87171";
+        messageDiv.textContent = "حدث خطأ أثناء الاتصال بقاعدة البيانات!";
+      }
+    });
+  </script>
 </body>
 </html>

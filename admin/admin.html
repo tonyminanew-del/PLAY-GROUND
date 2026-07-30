@@ -97,7 +97,7 @@
 
                 if (!snapshot.empty) {
                     const data = snapshot.docs[0].data();
-                    welcomeText.textContent = `أهلاً يا ${data.title || ""} ${data.name || ""}`;
+                    welcomeText.textContent = `أهلاً يا ${data.title || ""} ${data.username || ""}`;
                 } else {
                     welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
                 }

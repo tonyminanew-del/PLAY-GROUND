@@ -183,17 +183,16 @@
                 messageDiv.textContent = "جاري التحقق من البيانات...";
 
                 try {
-                    // 1. التحقق إذا كان اسم المستخدم مستخدماً من قبل في كولكشن admins
+                    // 1. التحقق من التكرار
                     const snapshot = await db.collection("admins")
                         .where("username", "==", username)
                         .get();
 
                     if (!snapshot.empty) {
-                        // إذا وُجد اسم المستخدم بالفعل
                         messageDiv.style.color = "#ff7675";
                         messageDiv.textContent = "اسم المستخدم هذا مُستخدم بالفعل، اختر اسماً آخر!";
                     } else {
-                        // 2. إدخال البيانات في كولكشن admins شاملة كلمة السر واللقب
+                        // 2. إدخال البيانات في Firebase
                         await db.collection("admins").add({
                             username: username,
                             password: password,
@@ -202,12 +201,17 @@
                             createdAt: new Date()
                         });
 
+                        // 3. ✨ الحل الأساسي لظهور الاسم في البروفايل ✨
+                        // حفظ البيانات في الذاكرة المحلية لتستطيع صفحة البروفايل قراءتها
+                        localStorage.setItem("adminUsername", username);
+                        localStorage.setItem("adminTitle", title);
+
                         messageDiv.style.color = "#55efc4";
                         messageDiv.textContent = "تم التسجيل بنجاح! جاري التوجيه...";
 
-                        // 3. التوجيه المباشر بعد ثانية إلى admin.html
+                        // 4. التوجيه إلى admin.html مع إرسال الاسم في الرابط أيضاً
                         setTimeout(() => {
-                            window.location.href = "admin.html";
+                            window.location.href = `admin.html?username=${encodeURIComponent(username)}`;
                         }, 1000);
                     }
                     

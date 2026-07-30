@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>إنشاء حساب جديد</title>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
@@ -14,7 +14,11 @@
     }
 
     body {
-      background: linear-gradient(135deg, #0f0c20 0%, #1e1b4b 100%);
+      background: #090d16;
+      /* خلفية متدرجة ذات طابع حديث وشبابي */
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.2) 0px, transparent 50%);
       color: #fff;
       display: flex;
       justify-content: center;
@@ -24,75 +28,91 @@
     }
 
     .dialog-box {
-      background: rgba(30, 27, 75, 0.6);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 40px 30px;
-      border-radius: 20px;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      padding: 35px 28px;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.1);
       width: 100%;
       max-width: 380px;
       text-align: center;
+      position: relative;
+    }
+
+    /* خط شريط علوي ملون يعطي مظهراً حاداً وشبابياً */
+    .dialog-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 15%;
+      right: 15%;
+      height: 3px;
+      background: linear-gradient(90deg, #38bdf8, #3b82f6);
+      border-radius: 0 0 5px 5px;
+      box-shadow: 0 0 10px #38bdf8;
     }
 
     .dialog-titlebar {
       font-size: 24px;
-      font-weight: 700;
+      font-weight: 800;
       margin-bottom: 25px;
-      color: #6366f1;
-      text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+      color: #38bdf8;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
     }
 
     .input-group {
-      margin-bottom: 15px;
-      text-align: right;
+      margin-bottom: 14px;
     }
 
     .input-field {
       width: 100%;
-      padding: 14px 16px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 10px;
-      background-color: rgba(15, 12, 32, 0.5);
-      color: #fff;
+      padding: 13px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background-color: rgba(15, 23, 42, 0.9);
+      color: #f1f5f9;
       font-size: 15px;
-      transition: all 0.3s ease;
+      transition: all 0.25s ease-in-out;
     }
 
     .input-field::placeholder {
-      color: #94a3b8;
+      color: #64748b;
     }
 
     .input-field:focus {
       outline: none;
-      border-color: #6366f1;
-      box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
-      background-color: rgba(15, 12, 32, 0.8);
+      border-color: #38bdf8;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+      background-color: #0f172a;
     }
 
     .btn {
       width: 100%;
       padding: 14px;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       cursor: pointer;
       margin-top: 10px;
       font-size: 16px;
-      font-weight: 700;
-      transition: all 0.3s ease;
+      font-weight: 800;
+      transition: all 0.25s ease;
     }
 
     .primary {
-      background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%);
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
       color: #ffffff;
-      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
-      background: linear-gradient(90deg, #4f46e5 0%, #4338ca 100%);
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.5);
+      background: linear-gradient(135deg, #38bdf8 0%, #1d4ed8 100%);
     }
 
     .primary:active {
@@ -100,11 +120,10 @@
     }
 
     #message {
-      margin-top: 20px;
+      margin-top: 18px;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 700;
       min-height: 20px;
-      transition: color 0.3s ease;
     }
   </style>
 </head>
@@ -127,6 +146,7 @@
             required
           >
         </div>
+
         <div class="input-group">
           <input 
             type="password" 
@@ -137,13 +157,25 @@
             required
           >
         </div>
+
+        <div class="input-group">
+          <input 
+            type="text" 
+            id="church" 
+            name="church"
+            class="input-field" 
+            placeholder="اسم الكنيسة التابع لها" 
+            required
+          >
+        </div>
+
         <div class="input-group">
           <input 
             type="tel" 
             id="phone" 
             name="phone"
             class="input-field" 
-            placeholder="رقم الهاتف (اختياري)" 
+            placeholder="رقم الهاتف" 
           >
         </div>
       </div> 
@@ -160,7 +192,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"; 
 
-    // إعدادات Firebase الخاصة بك
+    // إعدادات Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBGM0xBeu0wc2JV_4hgymDMDi1jlltf8SI",
       authDomain: "marygrgs.firebaseapp.com",
@@ -171,7 +203,6 @@
       measurementId: "G-YRH69L594N"
     }; 
 
-    // تهيئة Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app); 
 
@@ -183,27 +214,28 @@
 
       const usernameInput = document.getElementById('username').value.trim();
       const passwordInput = document.getElementById('password').value.trim();
+      const churchInput = document.getElementById('church').value.trim();
       const phoneInput = document.getElementById('phone').value.trim(); 
 
-      messageDiv.style.color = "#818cf8";
-      messageDiv.textContent = "جاري التحقق من اسم المستخدم..."; 
+      messageDiv.style.color = "#38bdf8";
+      messageDiv.textContent = "جاري التحقق والتسجيل..."; 
 
       try {
         const usersRef = collection(db, "users"); 
 
-        // 1. التحقق إذا كان الاسم موجوداً بالفعل في الكولكشن
+        // 1. التحقق من وجود الاسم سابقاً
         const checkQuery = query(usersRef, where("name", "==", usernameInput));
         const querySnapshot = await getDocs(checkQuery); 
 
         if (!querySnapshot.empty) {
-          // الاسم موجود بالفعل - يرفض التسجيل
           messageDiv.style.color = "#f87171";
           messageDiv.textContent = "اسم المستخدم هذا مُستخدم بالفعل، اختر اسماً آخر!";
         } else {
-          // 2. حفظ البيانات في Firebase
+          // 2. إرسال البيانات وقيمة الكنيسة إلى Firebase
           await addDoc(usersRef, {
             name: usernameInput,
             password: passwordInput,
+            church: churchInput, // إرسال اسم الكنيسة للبيز
             phone: phoneInput || "",
             createdAt: new Date()
           }); 
@@ -211,7 +243,7 @@
           messageDiv.style.color = "#4ade80";
           messageDiv.textContent = "تم التسجيل بنجاح! جاري التوجيه..."; 
 
-          // 3. التحويل إلى صفحة tony.html بعد النجاح
+          // 3. التحويل
           setTimeout(() => {
             window.location.href = "tony.html";
           }, 1000);

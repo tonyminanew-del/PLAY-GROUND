@@ -14,6 +14,7 @@
         <div style="font-size: 16px; color: #333; line-height: 1.8;">
             <p><strong>اللقب:</strong> <span id="profileTitle">جاري التحميل...</span></p>
             <p><strong>الاسم:</strong> <span id="profileusername">جاري التحميل...</span></p>
+            <p><strong>الكنيسة:</strong> <span id="profileChurch">جاري التحميل...</span></p>
             <p><strong>رقم الهاتف:</strong> <span id="profilePhone">جاري التحميل...</span></p>
             <p><strong>كلمة المرور:</strong> <span id="profilePassword" style="font-family: monospace; color: #c0392b; font-weight: bold;">جاري التحميل...</span></p>
         </div>
@@ -58,8 +59,9 @@
                     const data = snapshot.docs[0].data();
 
                     document.getElementById("profileTitle").textContent = data.title || "-";
-                    // تم ربط profileusername بحقل username من Firebase
                     document.getElementById("profileusername").textContent = data.username || "-";
+                    // جلب وعرض اسم الكنيسة من Firebase
+                    document.getElementById("profileChurch").textContent = data.church || "-";
                     document.getElementById("profilePhone").textContent = data.phone || "-";
                     
                     let password = data.password;

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إنشاء حساب جديد</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1e1e2e;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .dialog-box {
+      background: #2b2b3d;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      width: 320px;
+      text-align: center;
+    }
+    .dialog-titlebar {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #00d2d3;
+    }
+    .input-field {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      box-sizing: border-box;
+      border: 1px solid #444;
+      border-radius: 6px;
+      background-color: #1e1e2e;
+      color: #fff;
+      font-size: 14px;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: #00d2d3;
+    }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 15px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .primary {
+      background-color: #00d2d3;
+      color: #1e1e2e;
+    }
+    .primary:hover {
+      background-color: #00a8a9;
+    }
+    #message {
+      margin-top: 15px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dialog-box">
+    <div class="dialog-titlebar">
+      <span>إنشاء حساب جديد</span>
+    </div>
+
+    <form id="registerForm" action="tony.html" method="POST">
+      <div class="dialog-content">
+        <input 
+          type="text" 
+          id="username" 
+          name="username"
+          class="input-field" 
+          placeholder="اسم المستخدم" 
+          required
+        >
+        <input 
+          type="password" 
+          id="password" 
+          name="password"
+          class="input-field" 
+          placeholder="كلمة السر" 
+          required
+        >
+        <input 
+          type="tel" 
+          id="phone" 
+          name="phone"
+          class="input-field" 
+          placeholder="رقم الهاتف" 
+        >
+      </div>
+
+      <div class="dialog-buttons">
+        <button type="submit" class="btn primary">تسجيل</button>
+      </div>
+    </form>
+
+    <div id="message"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // إعدادات Firebase الخاصة بك
+    const firebaseConfig = {
+      apiKey: "AIzaSyBGM0xBeu0wc2JV_4hgymDMDi1jlltf8SI",
+      authDomain: "marygrgs.firebaseapp.com",
+      projectId: "marygrgs",
+      storageBucket: "marygrgs.firebasestorage.app",
+      messagingSenderId: "866893606556",
+      appId: "1:866893606556:web:d2b7bab1c8dcd8fd038759",
+      measurementId: "G-YRH69L594N"
+    };
+
+    // تهيئة Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const registerForm = document.getElementById('registerForm');
+    const messageDiv = document.getElementById('message');
+
+    registerForm.addEventListener('submit', async (e) => {
+      // إيقاف إرسال الـ Form المؤقت للتحقق من Firebase أولاً
+      e.preventDefault();
+
+      const usernameInput = document.getElementById('username').value.trim();
+      const passwordInput = document.getElementById('password').value.trim();
+      const phoneInput = document.getElementById('phone').value.trim();
+
+      messageDiv.style.color = "#00d2d3";
+      messageDiv.textContent = "جاري التحقق من اسم المستخدم...";
+
+      try {
+        const usersRef = collection(db, "users");
+
+        // 1. التحقق إذا كان الاسم موجوداً بالفعل في الكولكشن
+        const checkQuery = query(usersRef, where("name", "==", usernameInput));
+        const querySnapshot = await getDocs(checkQuery);
+
+        if (!querySnapshot.empty) {
+          // الاسم موجود بالفعل - يرفض التسجيل
+          messageDiv.style.color = "#ff7675";
+          messageDiv.textContent = "اسم المستخدم هذا مُستخدم بالفعل، اختر اسماً آخر!";
+        } else {
+          // 2. حفظ البيانات في Firebase
+          await addDoc(usersRef, {
+            name: usernameInput,
+            password: passwordInput,
+            phone: phoneInput || "",
+            createdAt: new Date()
+          });
+
+          messageDiv.style.color = "#55efc4";
+          messageDiv.textContent = "تم التسجيل بنجاح! جاري التوجيه...";
+
+          // 3. التحويل إلى صفحة tony.html بعد النجاح
+          setTimeout(() => {
+            window.location.href = "tony.html";
+          }, 1000);
+        }
+
+      } catch (error) {
+        console.error("Error adding user: ", error);
+        messageDiv.style.color = "#ff7675";
+        messageDiv.textContent = "حدث خطأ أثناء الاتصال بقاعدة البيانات!";
+      }
+    });
+  </script>
+</body>
+</html>

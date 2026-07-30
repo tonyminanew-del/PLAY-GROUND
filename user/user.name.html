@@ -15,7 +15,6 @@
 
     body {
       background: #090d16;
-      /* خلفية متدرجة ذات طابع حديث وشبابي */
       background-image: 
         radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
         radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.2) 0px, transparent 50%);
@@ -41,7 +40,6 @@
       position: relative;
     }
 
-    /* خط شريط علوي ملون يعطي مظهراً حاداً وشبابياً */
     .dialog-box::before {
       content: '';
       position: absolute;
@@ -134,7 +132,7 @@
       <span>إنشاء حساب جديد</span>
     </div> 
 
-    <form id="registerForm" action="tony.html" method="POST">
+    <form id="registerForm">
       <div class="dialog-content">
         <div class="input-group">
           <input 
@@ -190,9 +188,8 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"; 
+    import { getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"; 
 
-    // إعدادات Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBGM0xBeu0wc2JV_4hgymDMDi1jlltf8SI",
       authDomain: "marygrgs.firebaseapp.com",
@@ -231,21 +228,24 @@
           messageDiv.style.color = "#f87171";
           messageDiv.textContent = "اسم المستخدم هذا مُستخدم بالفعل، اختر اسماً آخر!";
         } else {
-          // 2. إرسال البيانات وقيمة الكنيسة إلى Firebase
-          await addDoc(usersRef, {
+          // 2. إرسال البيانات
+          const docRef = await addDoc(usersRef, {
             name: usernameInput,
             password: passwordInput,
-            church: churchInput, // إرسال اسم الكنيسة للبيز
+            church: churchInput,
             phone: phoneInput || "",
-            createdAt: new Date()
+            createdAt: serverTimestamp()
           }); 
+
+          // 3. حفظ ID المستخدم الجديد في ذاكرة المتصفح
+          localStorage.setItem("loggedInUserId", docRef.id);
 
           messageDiv.style.color = "#4ade80";
           messageDiv.textContent = "تم التسجيل بنجاح! جاري التوجيه..."; 
 
-          // 3. التحويل
+          // 4. التوجيه وتمرير الـ ID لصفحة tony.html
           setTimeout(() => {
-            window.location.href = "tony.html";
+            window.location.href = `tony.html?id=${docRef.id}`;
           }, 1000);
         } 
 

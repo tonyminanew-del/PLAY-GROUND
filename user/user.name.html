@@ -174,6 +174,7 @@
             name="phone"
             class="input-field" 
             placeholder="رقم الهاتف" 
+            required
           >
         </div>
       </div> 
@@ -214,26 +215,34 @@
       const churchInput = document.getElementById('church').value.trim();
       const phoneInput = document.getElementById('phone').value.trim(); 
 
+      // التأكد من أن الهاتف ليس فارغاً
+      if (!phoneInput) {
+        messageDiv.style.color = "#f87171";
+        messageDiv.textContent = "يرجى إدخال رقم الهاتف!";
+        return;
+      }
+
       messageDiv.style.color = "#38bdf8";
       messageDiv.textContent = "جاري التحقق والتسجيل..."; 
 
       try {
         const usersRef = collection(db, "users"); 
 
-        // 1. التحقق من وجود الاسم سابقاً
-        const checkQuery = query(usersRef, where("name", "==", usernameInput));
-        const querySnapshot = await getDocs(checkQuery); 
+        // 1. التحقق من وجود رقم الهاتف مسبقاً في قاعدة البيانات
+        const checkPhoneQuery = query(usersRef, where("phone", "==", phoneInput));
+        const phoneQuerySnapshot = await getDocs(checkPhoneQuery); 
 
-        if (!querySnapshot.empty) {
+        if (!phoneQuerySnapshot.empty) {
+          // إذا وجد الرقم بالفعل
           messageDiv.style.color = "#f87171";
-          messageDiv.textContent = "اسم المستخدم هذا مُستخدم بالفعل، اختر اسماً آخر!";
+          messageDiv.textContent = "رقم الهاتف هذا مُسجل بالفعل، يرجى استخدام رقم آخر!";
         } else {
-          // 2. إرسال البيانات
+          // 2. إرسال البيانات في حال عدم وجود الرقم
           const docRef = await addDoc(usersRef, {
             name: usernameInput,
             password: passwordInput,
             church: churchInput,
-            phone: phoneInput || "",
+            phone: phoneInput,
             createdAt: serverTimestamp()
           }); 
 
@@ -243,9 +252,9 @@
           messageDiv.style.color = "#4ade80";
           messageDiv.textContent = "تم التسجيل بنجاح! جاري التوجيه..."; 
 
-          // 4. التوجيه وتمرير الـ ID لصفحة tony.html
+          // 4. التوجيه
           setTimeout(() => {
-            window.location.href = `tony.html?id=${docRef.id}`;
+            window.location.href = `user/tony.html?id=${docRef.id}`;
           }, 1000);
         } 
 

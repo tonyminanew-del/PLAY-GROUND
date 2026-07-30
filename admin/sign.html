@@ -137,6 +137,11 @@
             </div>
 
             <div class="form-group">
+                <label for="adminChurch">اسم الكنيسة:</label>
+                <input type="text" id="adminChurch" required placeholder="اكتب اسم الكنيسة...">
+            </div>
+
+            <div class="form-group">
                 <label for="adminTitle">اللقب / الوصف:</label>
                 <select id="adminTitle">
                     <option value="اخ">اخ</option>
@@ -196,9 +201,10 @@
                 const username = document.getElementById("adminUsername").value.trim();
                 const password = document.getElementById("adminPassword").value.trim();
                 const phone = document.getElementById("adminPhone").value.trim();
+                const church = document.getElementById("adminChurch").value.trim(); // جلب اسم الكنيسة
                 const title = document.getElementById("adminTitle").value;
 
-                if (username === "" || password === "" || phone === "") {
+                if (username === "" || password === "" || phone === "" || church === "") {
                     messageDiv.style.color = "#ff7675";
                     messageDiv.textContent = "يرجى ملء جميع الحقول المطلوبة!";
                     return;
@@ -216,10 +222,12 @@
                         messageDiv.style.color = "#ff7675";
                         messageDiv.textContent = "اسم المستخدم هذا مُستخدم بالفعل، اختر اسماً آخر!";
                     } else {
+                        // إرسال البيانات بما فيها حقل الكنيسة (church) إلى Firebase
                         await db.collection("admins").add({
                             username: username,
                             password: password,
                             phone: phone,
+                            church: church,
                             title: title,
                             createdAt: new Date()
                         });

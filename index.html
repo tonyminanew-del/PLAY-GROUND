@@ -3,31 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول - ملعب كنيسة الشهيد العظيم مارجرجس</title>
+    <title>ملعب كنيسة الشهيد العظيم مارجرجس</title>
     <style>
-        body {
+        * {
+            box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            padding: 0;
             position: relative; 
         }
 
-        /* الطبقة المسؤولة عن الصورة */
+        /* خلفية الصفحة */
         body::before {
             content: "";
             background-image: url('Screenshot_20260729-171726_WhatsApp.jpg'); 
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            
-            /* تم زيادة الوضوح هنا من 0.3 إلى 0.6 */
-            opacity: 0.8; 
-            
+            opacity: 0.6; 
             position: fixed;
             top: 0;
             left: 0;
@@ -38,53 +40,63 @@
 
         .login-box {
             background: #ffffff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 35px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
             width: 100%;
             max-width: 400px;
             text-align: center;
-            box-sizing: border-box;
             position: relative;
             z-index: 1;
         }
 
         h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 20px;
+            line-height: 1.4;
         }
 
-        input[type="text"] {
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
             font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
             box-sizing: border-box;
-            margin-bottom: 15px;
-            text-align: center;
         }
 
-        input[type="text"]:focus {
-            border-color: #007bff;
-            outline: none;
-        }
-
-        button {
-            width: 100%;
-            padding: 10px;
+        /* زر المستخدم */
+        .btn-user {
             background-color: #007bff;
             color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
         }
 
-        button:hover {
+        .btn-user:hover {
             background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        /* زر الأدمن */
+        .btn-admin {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-admin:hover {
+            background-color: #1e7e34;
+            transform: translateY(-2px);
         }
 
         .login-footer {
@@ -105,7 +117,7 @@
         .login-footer a {
             color: #007bff;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
             transition: color 0.3s ease;
         }
@@ -119,12 +131,13 @@
 <body>
 
     <div class="login-box">
-        <h2>اهلا ببرنامج ملعب كنيسة الشهيد العظيم مارجرجس</h2>
+        <h2>أهلاً بك في برنامج ملعب كنيسة الشهيد العظيم مارجرجس</h2>
         
-        <form id="loginForm">
-            <input type="text" id="userInput" placeholder="أدخل الاسم " required>
-            <button type="submit">دخول</button>
-        </form>
+        <div class="buttons-container">
+            <a href="user/user.name.html" class="btn btn-user">تسجيل الدخول كمستخدم</a>
+            
+            <a href="admin/sign.html" class="btn btn-admin">تسجيل الدخول كـ أدمن</a>
+        </div>
     </div>
 
     <div class="login-footer">
@@ -132,18 +145,5 @@
         <a href="work.html">لدي حساب بالفعل</a>
     </div>
 
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const inputVal = document.getElementById('userInput').value.trim();
-
-            if (inputVal === 'TONY@CONTROL2026') {
-                window.location.href = 'admin/sign.html'; 
-            } else {
-                // تم التعديل لتكون المسار داخل مجلد user
-                window.location.href = 'user/user.name.html';
-            }
-        });
-    </script>
 </body>
 </html>

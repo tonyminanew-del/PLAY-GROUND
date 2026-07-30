@@ -13,6 +13,7 @@
         
         <div style="font-size: 16px; color: #333; line-height: 1.8;">
             <p><strong>الاسم:</strong> <span id="profileName">جاري التحميل...</span></p>
+            <p><strong>الكنيسة:</strong> <span id="profileChurch">جاري التحميل...</span></p>
             <p><strong>رقم الهاتف:</strong> <span id="profilePhone">جاري التحميل...</span></p>
             <p><strong>كلمة المرور:</strong> <span id="profilePassword" style="font-family: monospace; color: #c0392b; font-weight: bold;">جاري التحميل...</span></p>
         </div>
@@ -79,6 +80,7 @@
                     const title = userData.title ? userData.title + " " : "";
                     const name = userData.name || userData.userName || userData.adminName || userData.fullName || '-';
                     document.getElementById("profileName").textContent = title + name;
+                    document.getElementById("profileChurch").textContent = userData.church || "-";
                     document.getElementById("profilePhone").textContent = userData.phone || "-";
 
                     let password = userData.password;
@@ -93,12 +95,14 @@
                     document.getElementById("profilePassword").textContent = password || "-";
                 } else {
                     document.getElementById("profileName").textContent = "لا يوجد بيانات";
+                    document.getElementById("profileChurch").textContent = "لا يوجد بيانات";
                     document.getElementById("profilePhone").textContent = "لا يوجد بيانات";
                     document.getElementById("profilePassword").textContent = "-";
                 }
             } catch (error) {
                 console.error("خطأ في جلب بيانات البروفايل:", error);
                 document.getElementById("profileName").textContent = "تعذر الجلب";
+                document.getElementById("profileChurch").textContent = "تعذر الجلب";
                 document.getElementById("profilePassword").textContent = "-";
             }
 

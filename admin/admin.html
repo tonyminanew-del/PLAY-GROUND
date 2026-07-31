@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <link rel="stylesheet" href="Image.css">
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>admin page</title>
@@ -31,11 +29,15 @@
     </style>
 </head>
 <body>
+    <!-- جملة الترحيب -->
     <p class="title" id="welcomeText">جاري التحميل...</p>
 
+    <!-- صندوق الساعة الحية والحجز الحالي -->
     <div class="live-clock-box">
-        <h3>الوقت الحالي</h3>
+        <h3>الوقت الحالي والحجز القائم</h3>
         <p id="liveClock">--:--:-- --</p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+        <p id="currentBookingStatus">جاري فحص الحجوزات الحالية...</p>
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 400px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
@@ -52,6 +54,7 @@
         </form>
     </div>
 
+    <!-- استدعاء مكتبات فايربيس -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
@@ -72,6 +75,7 @@
         document.addEventListener("DOMContentLoaded", async () => {
             const welcomeText = document.getElementById("welcomeText");
             const liveClockElement = document.getElementById("liveClock");
+            const currentBookingElement = document.getElementById("currentBookingStatus");
 
             // 1. تشغيل الساعة الحية (ساعات، دقائق، ثواني مع AM/PM)
             function updateClock() {
@@ -99,7 +103,7 @@
 
                 if (!snapshot.empty) {
                     const data = snapshot.docs[0].data();
-                    welcomeText.textContent = `أهلاً يا ${data.title || ""} ${data.username || ""}`;
+                    welcomeText.textContent = `أهلاً يا ${data.title || ""} ${data.name || ""}`;
                 } else {
                     welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
                 }
@@ -107,7 +111,35 @@
                 console.error("خطأ في جلب بيانات الأدمن:", error);
                 welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
             }
+
+            // 3. التحقق من الحجز الموجود حالياً في قاعدة البيانات
+            try {
+                const reservationsSnapshot = await db.collection("reservations").get();
+                let activeBookingFound = false;
+
+                reservationsSnapshot.forEach(doc => {
+                    const resData = doc.data();
+                    // لو الحجز مقبول، يمكنك مقارنة الوقت هنا أو عرض الحجوزات النشطة اليوم
+                    if (resData.status === "مقبول") {
+                        // كمثال: نعرض تفاصيل الحجز الحالي المسجل
+                        // يمكنك مطابقة الوقت الحالي مع نطاق الساعات لو حبيت
+                        activeBookingFound = true;
+                        currentBookingElement.innerHTML = `الحجز الحالي: <b style="color: #c0392b;">${resData.time || resData.details}</b><br>بواسطة: <b>${resData.name}</b> (${resData.phone})`;
+                    }
+                });
+
+                if (!activeBookingFound) {
+                    currentBookingElement.innerHTML = "<span style='color: #27ae60;'>لا توجد حجوزات نشطة في هذه اللحظة.</span>";
+                }
+
+            } catch (error) {
+                console.error("خطأ في جلب حالة الحجز الحالي:", error);
+                currentBookingElement.textContent = "تعذر جلب حالة الحجز الحالي.";
+            }
         });
     </script>
-</body>
+       <form action="money.html" method="get">
+            <button type="submit" style="width: 100%; background-color: #14967a;">تقارير</button>
+        </form>
+    </div>
 </html>

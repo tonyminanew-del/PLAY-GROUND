@@ -7,7 +7,7 @@
 
 body {
     /* رابط الصورة من نفس المجلد */
-    background-image: url('Tony.jpg');
+    background-image: url('Tony.png');
     
     /* جعل الصورة تغطي الشاشة بالكامل بدون تكرار */
     background-size: cover;

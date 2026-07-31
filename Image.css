@@ -1,27 +1,4 @@
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
 
-body {
-    /* رابط الصورة من نفس المجلد */
-    background-image: url('Tony.jpg');
-    
-    /* جعل الصورة تغطي الشاشة بالكامل بدون تكرار */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    
-    color: #ffffff;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
 * {
     box-sizing: border-box;
     margin: 0;

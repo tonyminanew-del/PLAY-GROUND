@@ -1,1 +1,15 @@
+body {
+  background-color: #090d16; /* لون احتياطي */
+  background-image: url(''); /* ضع مسار الصورة هنا */
+  background-size: cover; /* لملء الشاشة بالكامل */
+  background-position: center; /* لتوسيط الصورة */
+  background-repeat: no-repeat; /* لعدم تكرار الصورة */
+  
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
 

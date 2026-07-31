@@ -31,7 +31,7 @@ body {
 
 body {
     /* رابط الصورة من نفس المجلد */
-    background-image: url('');
+    background-image: url('Screenshot_20260731-134115_WhatsApp.jpg');
     
     /* جعل الصورة تغطي الشاشة بالكامل بدون تكرار */
     background-size: cover;

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة تحكم الحجوزات</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .filters { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        .filters div { display: flex; flex-direction: column; }
+        label { font-size: 14px; margin-bottom: 5px; font-weight: bold; }
+        input, select { padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 9px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background-color: #f8f9fa; }
+        .total-box { margin-top: 20px; font-size: 18px; font-weight: bold; background: #e9ecef; padding: 10px; border-radius: 4px; text-align: left; }
+        
+        .client-link { color: #007bff; cursor: pointer; text-decoration: underline; font-weight: bold; }
+        .client-link:hover { color: #0056b3; }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 450px; max-width: 90%; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative; max-height: 80vh; overflow-y: auto; }
+        .close-btn { background: #dc3545; float: left; padding: 5px 10px; border-radius: 4px; color: white; border: none; cursor: pointer; }
+        .modal-content h3 { margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; }
+        .info-group { background: #f8f9fa; padding: 10px; margin-bottom: 10px; border-radius: 5px; border-right: 4px solid #007bff; }
+        .info-group h4 { margin: 0 0 5px 0; color: #007bff; font-size: 14px; }
+        .info-group p { margin: 4px 0; font-size: 14px; color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>لوحة متابعة الحجوزات والإيرادات</h2>
+
+    <div class="filters">
+        <div>
+            <label>نوع العرض:</label>
+            <select id="filterType" onchange="toggleFilterInputs()">
+                <option value="today">حجوزات اليوم</option>
+                <option value="day">يوم محدد</option>
+                <option value="month">شهر محدد</option>
+                <option value="year">سنة محددة</option>
+            </select>
+        </div>
+
+        <div id="dayInputContainer" style="display:none;">
+            <label>اختر اليوم:</label>
+            <input type="date" id="selectedDate">
+        </div>
+
+        <div id="monthInputContainer" style="display:none;">
+            <label>اختر الشهر:</label>
+            <input type="month" id="selectedMonth">
+        </div>
+
+        <div id="yearInputContainer" style="display:none;">
+            <label>اختر السنة:</label>
+            <input type="number" id="selectedYear" placeholder="مثال: 2026" min="2020" max="2035">
+        </div>
+
+        <div style="justify-content: flex-end;">
+            <label>&nbsp;</label>
+            <button onclick="fetchBookings()">بحث / عرض</button>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>اسم العميل / الشخص</th>
+                <th>التاريخ</th>
+                <th>المبلغ المدفوع</th>
+                <th>بيانات أخرى</th>
+            </tr>
+        </thead>
+        <tbody id="bookingsTableBody">
+            </tbody>
+    </table>
+
+    <div class="total-box">
+        إجمالي المبالغ: <span id="totalAmount">0</span> جنيه
+    </div>
+</div>
+
+<div id="detailsModal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal()">إغلاق</button>
+        <h3>تفاصيل الحجز والمستخدم</h3>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBGM0xBeu0wc2JV_4hgymDMDi1jlltf8SI",
+        authDomain: "marygrgs.firebaseapp.com",
+        projectId: "marygrgs",
+        storageBucket: "marygrgs.firebasestorage.app",
+        messagingSenderId: "866893606556",
+        appId: "1:866893606556:web:d2b7bab1c8dcd8fd038759",
+        measurementId: "G-YRH69L594N"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let loadedBookingsData = {};
+
+    window.toggleFilterInputs = function() {
+        const type = document.getElementById('filterType').value;
+        document.getElementById('dayInputContainer').style.display = (type === 'day') ? 'flex' : 'none';
+        document.getElementById('monthInputContainer').style.display = (type === 'month') ? 'flex' : 'none';
+        document.getElementById('yearInputContainer').style.display = (type === 'year') ? 'flex' : 'none';
+    }
+
+    window.fetchBookings = async function() {
+        const type = document.getElementById('filterType').value;
+        const tableBody = document.getElementById('bookingsTableBody');
+        const totalAmountSpan = document.getElementById('totalAmount');
+        
+        tableBody.innerHTML = "<tr><td colspan='4'>جاري البحث...</td></tr>";
+        let total = 0;
+        let rowsHtml = "";
+        loadedBookingsData = {};
+
+        try {
+            const bookingsRef = collection(db, "bookings");
+            const querySnapshot = await getDocs(bookingsRef);
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            for (const documentSnap of querySnapshot.docs) {
+                const data = documentSnap.data();
+                const docId = documentSnap.id;
+                const bookingDate = data.date;
+
+                if (!bookingDate) continue;
+
+                let match = false;
+                if (type === 'today' && bookingDate === todayStr) match = true;
+                else if (type === 'day' && bookingDate === document.getElementById('selectedDate').value) match = true;
+                else if (type === 'month' && bookingDate.startsWith(document.getElementById('selectedMonth').value)) match = true;
+                else if (type === 'year' && bookingDate.startsWith(document.getElementById('selectedYear').value)) match = true;
+
+                if (match) {
+                    let clientName = data.name || data.userName || "بدون اسم";
+
+                    // إذا وجدنا userId ولم يكن الاسم موجوداً في وثيقة الحجز، نحاول جلبه من مجموعة users
+                    if (data.userId && clientName === "بدون اسم") {
+                        try {
+                            const userDocRef = doc(db, "users", data.userId);
+                            const userDocSnap = await getDoc(userDocRef);
+                            if (userDocSnap.exists()) {
+                                const userData = userDocSnap.data();
+                                clientName = userData.name || userData.fullName || userData.userName || "بدون اسم";
+                                data.userFetchedData = userData; // حفظ بيانات المستخدم لعرضها في النافذة المنبثقة
+                            }
+                        } catch (err) {
+                            console.error("خطأ في جلب بيانات المستخدم:", err);
+                        }
+                    }
+
+                    data.resolvedName = clientName;
+                    loadedBookingsData[docId] = data;
+
+                    const amount = Number(data.amount) || 0;
+                    total += amount;
+
+                    rowsHtml += `
+                        <tr>
+                            <td><span class="client-link" onclick="showBookingDetails('${docId}')">${clientName}</span></td>
+                            <td>${bookingDate}</td>
+                            <td>${amount}</td>
+                            <td>${data.details || data.phone || '-'}</td>
+                        </tr>
+                    `;
+                }
+            }
+
+            tableBody.innerHTML = rowsHtml || "<tr><td colspan='4'>لا توجد حجوزات مطابقة للفترة المحددة</td></tr>";
+            totalAmountSpan.innerText = total;
+
+        } catch (error) {
+            console.error("خطأ في جلب البيانات: ", error);
+            tableBody.innerHTML = "<tr><td colspan='4' style='color:red;'>حدث خطأ أثناء تحميل البيانات</td></tr>";
+        }
+    }
+
+    window.showBookingDetails = function(docId) {
+        const data = loadedBookingsData[docId];
+        if (!data) return;
+
+        let html = `
+            <div class="info-group">
+                <h4>بيانات المستخدم:</h4>
+                <p><strong>الاسم:</strong> ${data.resolvedName}</p>
+                <p><strong>معرف المستخدم (userId):</strong> ${data.userId || '-'}</p>
+                ${data.userPhone ? `<p><strong>رقم الهاتف:</strong> ${data.userPhone}</p>` : ''}
+            </div>
+            <div class="info-group">
+                <h4>بيانات الحجز:</h4>
+                <p><strong>التاريخ:</strong> ${data.date || '-'}</p>
+                <p><strong>الوقت:</strong> ${data.time || '-'}</p>
+                <p><strong>المبلغ المدفوع:</strong> ${data.amount || 0} جنيه</p>
+                <p><strong>طريقة الدفع:</strong> ${data.paymentMethod || '-'}</p>
+                ${data.createdAt ? `<p><strong>وقت الإنشاء:</strong> ${data.createdAt.toDate ? data.createdAt.toDate().toLocaleString('ar-EG') : data.createdAt}</p>` : ''}
+            </div>
+        `;
+
+        // إضافة أي بيانات إضافية موجودة في الحجز لم تذكر بالأعلى
+        let otherFields = '';
+        for (const [key, value] of Object.entries(data)) {
+            if (!['userId', 'name', 'userName', 'date', 'time', 'amount', 'paymentMethod', 'createdAt', 'resolvedName', 'userFetchedData', 'userPhone'].includes(key)) {
+                otherFields += `<p><strong>${key}:</strong> ${value}</p>`;
+            }
+        }
+
+        if (otherFields) {
+            html += `
+                <div class="info-group">
+                    <h4>بيانات أخرى:</h4>
+                    ${otherFields}
+                </div>
+            `;
+        }
+
+        document.getElementById('modalBody').innerHTML = html;
+        document.getElementById('detailsModal').style.display = 'flex';
+    }
+
+    window.closeModal = function() {
+        document.getElementById('detailsModal').style.display = 'none';
+    }
+
+    window.onload = () => {
+        fetchBookings();
+    };
+</script>
+
+</body>
+</html>

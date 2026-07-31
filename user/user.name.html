@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>إنشاء حساب جديد</title>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
@@ -14,6 +13,7 @@
       font-family: 'Tajawal', sans-serif;
     }
 
+    /* تنسيق الخلفية بشكل صحيح وثابت */
     body {
       background: #090d16;
       background-image: 
@@ -25,6 +25,23 @@
       align-items: center;
       min-height: 100vh;
       padding: 20px;
+      position: relative;
+    }
+
+    /* طبقة الخلفية للصورة */
+    body::before {
+      content: "";
+      background-image: url('Screenshot_20260729-171726_WhatsApp.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.5; /* يمكنك التحكم بشفافية الصورة إذا أردت إظهار الألوان خلفها */
     }
 
     .dialog-box {
@@ -39,6 +56,7 @@
       max-width: 380px;
       text-align: center;
       position: relative;
+      z-index: 1;
     }
 
     .dialog-box::before {
@@ -216,7 +234,6 @@
       const churchInput = document.getElementById('church').value.trim();
       const phoneInput = document.getElementById('phone').value.trim(); 
 
-      // التأكد من أن الهاتف ليس فارغاً
       if (!phoneInput) {
         messageDiv.style.color = "#f87171";
         messageDiv.textContent = "يرجى إدخال رقم الهاتف!";
@@ -229,16 +246,13 @@
       try {
         const usersRef = collection(db, "users"); 
 
-        // 1. التحقق من وجود رقم الهاتف مسبقاً في قاعدة البيانات
         const checkPhoneQuery = query(usersRef, where("phone", "==", phoneInput));
         const phoneQuerySnapshot = await getDocs(checkPhoneQuery); 
 
         if (!phoneQuerySnapshot.empty) {
-          // إذا وجد الرقم بالفعل
           messageDiv.style.color = "#f87171";
           messageDiv.textContent = "رقم الهاتف هذا مُسجل بالفعل، يرجى استخدام رقم آخر!";
         } else {
-          // 2. إرسال البيانات في حال عدم وجود الرقم
           const docRef = await addDoc(usersRef, {
             name: usernameInput,
             password: passwordInput,
@@ -247,13 +261,11 @@
             createdAt: serverTimestamp()
           }); 
 
-          // 3. حفظ ID المستخدم الجديد في ذاكرة المتصفح
           localStorage.setItem("loggedInUserId", docRef.id);
 
           messageDiv.style.color = "#4ade80";
           messageDiv.textContent = "تم التسجيل بنجاح! جاري التوجيه..."; 
 
-          // 4. التوجيه
           setTimeout(() => {
             window.location.href = `tony.html?id=${docRef.id}`;
           }, 1000);

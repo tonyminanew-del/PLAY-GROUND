@@ -1,9 +1,10 @@
 body {
-  background-color: #090d16; /* لون احتياطي */
-  background-image: url('Screenshot_20260731-134115_WhatsApp.jpg'); /* ضع مسار الصورة هنا */
-  background-size: cover; /* لملء الشاشة بالكامل */
-  background-position: center; /* لتوسيط الصورة */
-  background-repeat: no-repeat; /* لعدم تكرار الصورة */
+  background-color: #090d16;
+  /* نقطتين ثم سلاش .. / تعني اخرج خطوة واحدة لبره المجلد */
+  background-image: url('../Screenshot_20260731-134115_WhatsApp.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   
   color: #fff;
   display: flex;
@@ -12,4 +13,3 @@ body {
   min-height: 100vh;
   padding: 20px;
 }
-

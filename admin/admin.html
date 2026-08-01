@@ -3,56 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>admin page</title>
+    <title>لوحة التحكم الرئيسية</title>
     <link rel="stylesheet" href="../style.css">
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .welcome-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
         .live-clock-box {
             background: white;
             color: #333;
-            padding: 15px 20px;
+            padding: 15px 25px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
             text-align: center;
             width: 100%;
-            max-width: 400px;
+            max-width: 350px;
         }
         .live-clock-box h3 {
-            margin: 0 0 8px 0;
+            margin: 0 0 5px 0;
             color: #2980b9;
-            font-size: 18px;
+            font-size: 16px;
         }
         .live-clock-box p {
-            margin: 5px 0;
-            font-size: 15px;
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: #444;
         }
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 350px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        .menu-container button {
+            width: 100%;
+            padding: 12px;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+        .menu-container button:hover {
+            opacity: 0.9;
+        }
+        .btn-management { background-color: #007bff; }
+        .btn-profile { background-color: #8e44ad; }
+        .btn-reports { background-color: #14967a; }
     </style>
 </head>
 <body>
-    <!-- جملة الترحيب -->
-    <p class="title" id="welcomeText">جاري التحميل...</p>
 
-    <!-- صندوق الساعة الحية والحجز الحالي -->
+    <h1 class="title welcome-title" id="welcomeText">جاري التحميل...</h1>
+
     <div class="live-clock-box">
-        <h3>الوقت الحالي والحجز القائم</h3>
+        <h3>الوقت الحالي</h3>
         <p id="liveClock">--:--:-- --</p>
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
-        <p id="currentBookingStatus">جاري فحص الحجوزات الحالية...</p>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 400px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
+    <div class="menu-container">
         <form action="managment.html" method="get">
-            <button type="submit" style="width: 100%;">إدارة الحجوزات</button>
+            <button type="submit" class="btn-management">إدارة الحجوزات</button>
         </form>
         
-        
-        
+        <form action="money.html" method="get">
+            <button type="submit" class="btn-reports">التقارير</button>
+        </form>
+
         <form action="profile.html" method="get">
-            <button type="submit" style="width: 100%; background-color: #8e44ad;">profile</button>
+            <button type="submit" class="btn-profile">الملف الشخصي</button>
         </form>
     </div>
 
-    <!-- استدعاء مكتبات فايربيس -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
@@ -73,9 +119,8 @@
         document.addEventListener("DOMContentLoaded", async () => {
             const welcomeText = document.getElementById("welcomeText");
             const liveClockElement = document.getElementById("liveClock");
-            const currentBookingElement = document.getElementById("currentBookingStatus");
 
-            // 1. تشغيل الساعة الحية (ساعات، دقائق، ثواني مع AM/PM)
+            // 1. تشغيل الساعة الحية
             function updateClock() {
                 const now = new Date();
                 let hours = now.getHours();
@@ -84,7 +129,7 @@
                 const ampm = hours >= 12 ? 'PM' : 'AM';
                 
                 hours = hours % 12;
-                hours = hours ? hours : 12; // الساعة 0 تصبح 12
+                hours = hours ? hours : 12; 
                 const formattedHours = String(hours).padStart(2, '0');
 
                 liveClockElement.textContent = `${formattedHours}:${minutes}:${seconds} ${ampm}`;
@@ -92,16 +137,23 @@
             setInterval(updateClock, 1000);
             updateClock();
 
-            // 2. جلب الترحيب بالأدمن من قاعدة البيانات
+            // 2. جلب الترحيب بالأدمن (اللقب + الاسم) من مجموعة admins
             try {
-                const snapshot = await db.collection("admins")
-                    .orderBy("createdAt", "desc")
-                    .limit(1)
-                    .get();
+                const snapshot = await db.collection("admins").get();
 
                 if (!snapshot.empty) {
+                    // نجلب أول وثيقة أو يمكنك تعديلها حسب تصميم قاعدة البيانات لديك
                     const data = snapshot.docs[0].data();
-                    welcomeText.textContent = `أهلاً يا ${data.title || ""} ${data.name || ""}`;
+                    
+                    // التحقق من الحقول المحتملة للاسم واللقب
+                    const title = data.title || data.prefix || data.jobTitle || "";
+                    const name = data.name || data.fullName || data.userName || "";
+                    
+                    if (name) {
+                        welcomeText.textContent = `أهلاً يا ${title} ${name}`.trim();
+                    } else {
+                        welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
+                    }
                 } else {
                     welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
                 }
@@ -109,35 +161,7 @@
                 console.error("خطأ في جلب بيانات الأدمن:", error);
                 welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
             }
-
-            // 3. التحقق من الحجز الموجود حالياً في قاعدة البيانات
-            try {
-                const reservationsSnapshot = await db.collection("reservations").get();
-                let activeBookingFound = false;
-
-                reservationsSnapshot.forEach(doc => {
-                    const resData = doc.data();
-                    // لو الحجز مقبول، يمكنك مقارنة الوقت هنا أو عرض الحجوزات النشطة اليوم
-                    if (resData.status === "مقبول") {
-                        // كمثال: نعرض تفاصيل الحجز الحالي المسجل
-                        // يمكنك مطابقة الوقت الحالي مع نطاق الساعات لو حبيت
-                        activeBookingFound = true;
-                        currentBookingElement.innerHTML = `الحجز الحالي: <b style="color: #c0392b;">${resData.time || resData.details}</b><br>بواسطة: <b>${resData.name}</b> (${resData.phone})`;
-                    }
-                });
-
-                if (!activeBookingFound) {
-                    currentBookingElement.innerHTML = "<span style='color: #27ae60;'>لا توجد حجوزات نشطة في هذه اللحظة.</span>";
-                }
-
-            } catch (error) {
-                console.error("خطأ في جلب حالة الحجز الحالي:", error);
-                currentBookingElement.textContent = "تعذر جلب حالة الحجز الحالي.";
-            }
         });
     </script>
-       <form action="money.html" method="get">
-            <button type="submit" style="width: 100%; background-color: #14967a;">تقارير</button>
-        </form>
-    </div>
+</body>
 </html>

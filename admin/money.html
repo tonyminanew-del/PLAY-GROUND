@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+  </body>
+رش<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -42,6 +43,7 @@
                 <option value="day">يوم محدد</option>
                 <option value="month">شهر محدد</option>
                 <option value="year">سنة محددة</option>
+                <option value="basket">🛒 السلة (الحجوزات المرفوضة)</option>
             </select>
         </div>
 
@@ -72,7 +74,7 @@
                 <th>اسم العميل / الشخص</th>
                 <th>التاريخ</th>
                 <th>المبلغ المدفوع</th>
-                <th>بيانات أخرى</th>
+                <th>الحالة</th>
             </tr>
         </thead>
         <tbody id="bookingsTableBody">
@@ -137,19 +139,39 @@
                 const data = documentSnap.data();
                 const docId = documentSnap.id;
                 const bookingDate = data.date;
+                const bookingStatus = data.status ? String(data.status).toLowerCase().trim() : '';
 
-                if (!bookingDate) continue;
+                // التحقق ما إذا كان الحجز مرفوضاً (سواء بالإنجليزية أو العربية)
+                const isRejected = bookingStatus === 'rejected' || 
+                                   bookingStatus === 'refused' || 
+                                   bookingStatus === 'cancelled' || 
+                                   bookingStatus.includes('مرفوض') || 
+                                   bookingStatus.includes('ملغي');
 
                 let match = false;
-                if (type === 'today' && bookingDate === todayStr) match = true;
-                else if (type === 'day' && bookingDate === document.getElementById('selectedDate').value) match = true;
-                else if (type === 'month' && bookingDate.startsWith(document.getElementById('selectedMonth').value)) match = true;
-                else if (type === 'year' && bookingDate.startsWith(document.getElementById('selectedYear').value)) match = true;
+
+                if (type === 'basket') {
+                    // السلة تعرض فقط الحجوزات المرفوضة
+                    if (isRejected) {
+                        match = true;
+                    }
+                } else {
+                    // الفلاتر العادية تستبعد الحجوزات المرفوضة تماماً
+                    if (isRejected) {
+                        continue;
+                    }
+
+                    if (!bookingDate) continue;
+
+                    if (type === 'today' && bookingDate === todayStr) match = true;
+                    else if (type === 'day' && bookingDate === document.getElementById('selectedDate').value) match = true;
+                    else if (type === 'month' && bookingDate.startsWith(document.getElementById('selectedMonth').value)) match = true;
+                    else if (type === 'year' && bookingDate.startsWith(document.getElementById('selectedYear').value)) match = true;
+                }
 
                 if (match) {
                     let clientName = data.name || data.userName || "بدون اسم";
 
-                    // إذا وجدنا userId ولم يكن الاسم موجوداً في وثيقة الحجز، نحاول جلبه من مجموعة users
                     if (data.userId && clientName === "بدون اسم") {
                         try {
                             const userDocRef = doc(db, "users", data.userId);
@@ -157,7 +179,7 @@
                             if (userDocSnap.exists()) {
                                 const userData = userDocSnap.data();
                                 clientName = userData.name || userData.fullName || userData.userName || "بدون اسم";
-                                data.userFetchedData = userData; // حفظ بيانات المستخدم لعرضها في النافذة المنبثقة
+                                data.userFetchedData = userData;
                             }
                         } catch (err) {
                             console.error("خطأ في جلب بيانات المستخدم:", err);
@@ -168,21 +190,29 @@
                     loadedBookingsData[docId] = data;
 
                     const amount = Number(data.amount) || 0;
-                    total += amount;
+                    
+                    // إذا لم يكن في السلة، يتم احتساب المبالغ الإجمالية
+                    if (type !== 'basket') {
+                        total += amount;
+                    }
+
+                    // إذا كان في السلة، نعرض المبلغ كـ 0 أو شرطة لكي لا يتم حسابه
+                    const displayAmount = (type === 'basket') ? '-' : amount;
+                    const statusText = isRejected ? '<span style="color:red; font-weight:bold;">مرفوض</span>' : (data.status || 'نشط');
 
                     rowsHtml += `
                         <tr>
                             <td><span class="client-link" onclick="showBookingDetails('${docId}')">${clientName}</span></td>
-                            <td>${bookingDate}</td>
-                            <td>${amount}</td>
-                            <td>${data.details || data.phone || '-'}</td>
+                            <td>${bookingDate || '-'}</td>
+                            <td>${displayAmount}</td>
+                            <td>${statusText}</td>
                         </tr>
                     `;
                 }
             }
 
             tableBody.innerHTML = rowsHtml || "<tr><td colspan='4'>لا توجد حجوزات مطابقة للفترة المحددة</td></tr>";
-            totalAmountSpan.innerText = total;
+            totalAmountSpan.innerText = (type === 'basket') ? 0 : total;
 
         } catch (error) {
             console.error("خطأ في جلب البيانات: ", error);
@@ -194,6 +224,8 @@
         const data = loadedBookingsData[docId];
         if (!data) return;
 
+        const isRejected = (data.status && (String(data.status).toLowerCase().includes('مرفوض') || String(data.status).toLowerCase() === 'rejected'));
+
         let html = `
             <div class="info-group">
                 <h4>بيانات المستخدم:</h4>
@@ -204,17 +236,17 @@
             <div class="info-group">
                 <h4>بيانات الحجز:</h4>
                 <p><strong>التاريخ:</strong> ${data.date || '-'}</p>
-                <p><strong>الوقت:</strong> ${data.time || '-'}</p>
-                <p><strong>المبلغ المدفوع:</strong> ${data.amount || 0} جنيه</p>
-                <p><strong>طريقة الدفع:</strong> ${data.paymentMethod || '-'}</p>
+                ${!isRejected ? `<p><strong>الوقت:</strong> ${data.time || '-'}</p>` : ''}
+                <p><strong>المبلغ المدفوع:</strong> ${isRejected ? '0 (غير محسوب)' : (data.amount || 0) + ' جنيه'}</p>
+                ${!isRejected ? `<p><strong>طريقة الدفع:</strong> ${data.paymentMethod || '-'}</p>` : ''}
+                <p><strong>الحالة:</strong> <span style="color:red; font-weight:bold;">${data.status || 'مرفوض'}</span></p>
                 ${data.createdAt ? `<p><strong>وقت الإنشاء:</strong> ${data.createdAt.toDate ? data.createdAt.toDate().toLocaleString('ar-EG') : data.createdAt}</p>` : ''}
             </div>
         `;
 
-        // إضافة أي بيانات إضافية موجودة في الحجز لم تذكر بالأعلى
         let otherFields = '';
         for (const [key, value] of Object.entries(data)) {
-            if (!['userId', 'name', 'userName', 'date', 'time', 'amount', 'paymentMethod', 'createdAt', 'resolvedName', 'userFetchedData', 'userPhone'].includes(key)) {
+            if (!['userId', 'name', 'userName', 'date', 'time', 'amount', 'paymentMethod', 'createdAt', 'resolvedName', 'userFetchedData', 'userPhone', 'status'].includes(key)) {
                 otherFields += `<p><strong>${key}:</strong> ${value}</p>`;
             }
         }

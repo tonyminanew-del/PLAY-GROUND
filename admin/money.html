@@ -1,12 +1,11 @@
-  </body>
-رش<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة تحكم الحجوزات</title>
+    <title>لوحة تحكم الحجوزات والإيرادات</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .container { max-width: 950px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .filters { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
         .filters div { display: flex; flex-direction: column; }
         label { font-size: 14px; margin-bottom: 5px; font-weight: bold; }
@@ -28,6 +27,7 @@
         .info-group { background: #f8f9fa; padding: 10px; margin-bottom: 10px; border-radius: 5px; border-right: 4px solid #007bff; }
         .info-group h4 { margin: 0 0 5px 0; color: #007bff; font-size: 14px; }
         .info-group p { margin: 4px 0; font-size: 14px; color: #333; }
+        .multi-inputs { display: flex; flex-direction: row !important; gap: 5px; align-items: center; }
     </style>
 </head>
 <body>
@@ -41,8 +41,10 @@
             <select id="filterType" onchange="toggleFilterInputs()">
                 <option value="today">حجوزات اليوم</option>
                 <option value="day">يوم محدد</option>
-                <option value="month">شهر محدد</option>
-                <option value="year">سنة محددة</option>
+                <option value="month">شهر فردي (الحالي / سابق)</option>
+                <option value="multi_months">🔗 دمج عدة شهور</option>
+                <option value="year">سنة فردية</option>
+                <option value="multi_years">🔗 دمج عدة سنين</option>
                 <option value="basket">🛒 السلة (الحجوزات المرفوضة)</option>
             </select>
         </div>
@@ -57,9 +59,23 @@
             <input type="month" id="selectedMonth">
         </div>
 
+        <div id="multiMonthsContainer" style="display:none;">
+            <label>اختر الشهور للدمج:</label>
+            <div class="multi-inputs">
+                <input type="month" id="mMonth1">
+                <span>إلى</span>
+                <input type="month" id="mMonth2">
+            </div>
+        </div>
+
         <div id="yearInputContainer" style="display:none;">
             <label>اختر السنة:</label>
             <input type="number" id="selectedYear" placeholder="مثال: 2026" min="2020" max="2035">
+        </div>
+
+        <div id="multiYearsContainer" style="display:none;">
+            <label>أدخل السنين (مفصولة بفواصل):</label>
+            <input type="text" id="selectedYearsList" placeholder="مثال: 2025, 2026">
         </div>
 
         <div style="justify-content: flex-end;">
@@ -67,6 +83,8 @@
             <button onclick="fetchBookings()">بحث / عرض</button>
         </div>
     </div>
+
+    <div id="reportBadge" style="margin-bottom: 10px; font-weight: bold; color: #555;"></div>
 
     <table>
         <thead>
@@ -117,23 +135,47 @@
         const type = document.getElementById('filterType').value;
         document.getElementById('dayInputContainer').style.display = (type === 'day') ? 'flex' : 'none';
         document.getElementById('monthInputContainer').style.display = (type === 'month') ? 'flex' : 'none';
+        document.getElementById('multiMonthsContainer').style.display = (type === 'multi_months') ? 'flex' : 'none';
         document.getElementById('yearInputContainer').style.display = (type === 'year') ? 'flex' : 'none';
+        document.getElementById('multiYearsContainer').style.display = (type === 'multi_years') ? 'flex' : 'none';
     }
 
     window.fetchBookings = async function() {
         const type = document.getElementById('filterType').value;
         const tableBody = document.getElementById('bookingsTableBody');
         const totalAmountSpan = document.getElementById('totalAmount');
+        const reportBadge = document.getElementById('reportBadge');
         
         tableBody.innerHTML = "<tr><td colspan='4'>جاري البحث...</td></tr>";
+        reportBadge.innerHTML = "";
         let total = 0;
         let rowsHtml = "";
         loadedBookingsData = {};
 
+        const currentDate = new Date();
+        const currentYearStr = currentDate.getFullYear().toString();
+        const currentMonthNum = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+        const currentMonthStr = `${currentYearStr}-${currentMonthNum}`;
+
         try {
             const bookingsRef = collection(db, "bookings");
             const querySnapshot = await getDocs(bookingsRef);
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = currentDate.toISOString().split('T')[0];
+
+            let activeTitle = "";
+            if (type === 'month') {
+                const selectedM = document.getElementById('selectedMonth').value;
+                if (selectedM === currentMonthStr) {
+                    activeTitle = `📁 الشهر الحالي (${selectedM})`;
+                } else if (selectedM) {
+                    activeTitle = `📁 شهر منتهي (${selectedM})`;
+                }
+            } else if (type === 'multi_months') {
+                activeTitle = `🔗 تقرير دمج الشهور المحددة`;
+            } else if (type === 'multi_years') {
+                activeTitle = `🔗 تقرير دمج السنين المحددة`;
+            }
+            reportBadge.innerHTML = activeTitle;
 
             for (const documentSnap of querySnapshot.docs) {
                 const data = documentSnap.data();
@@ -141,7 +183,6 @@
                 const bookingDate = data.date;
                 const bookingStatus = data.status ? String(data.status).toLowerCase().trim() : '';
 
-                // التحقق ما إذا كان الحجز مرفوضاً (سواء بالإنجليزية أو العربية)
                 const isRejected = bookingStatus === 'rejected' || 
                                    bookingStatus === 'refused' || 
                                    bookingStatus === 'cancelled' || 
@@ -151,22 +192,39 @@
                 let match = false;
 
                 if (type === 'basket') {
-                    // السلة تعرض فقط الحجوزات المرفوضة
-                    if (isRejected) {
-                        match = true;
-                    }
+                    if (isRejected) match = true;
                 } else {
-                    // الفلاتر العادية تستبعد الحجوزات المرفوضة تماماً
-                    if (isRejected) {
-                        continue;
-                    }
-
+                    if (isRejected) continue;
                     if (!bookingDate) continue;
 
-                    if (type === 'today' && bookingDate === todayStr) match = true;
-                    else if (type === 'day' && bookingDate === document.getElementById('selectedDate').value) match = true;
-                    else if (type === 'month' && bookingDate.startsWith(document.getElementById('selectedMonth').value)) match = true;
-                    else if (type === 'year' && bookingDate.startsWith(document.getElementById('selectedYear').value)) match = true;
+                    const bookingYear = bookingDate.split('-')[0];
+                    const bookingMonth = bookingDate.substring(0, 7);
+
+                    if (type === 'today' && bookingDate === todayStr) {
+                        match = true;
+                    } else if (type === 'day' && bookingDate === document.getElementById('selectedDate').value) {
+                        match = true;
+                    } else if (type === 'month' && bookingMonth === document.getElementById('selectedMonth').value) {
+                        match = true;
+                    } else if (type === 'multi_months') {
+                        const m1 = document.getElementById('mMonth1').value;
+                        const m2 = document.getElementById('mMonth2').value;
+                        if (m1 && m2 && bookingMonth >= m1 && bookingMonth <= m2) {
+                            match = true;
+                        } else if (m1 && !m2 && bookingMonth === m1) {
+                            match = true;
+                        }
+                    } else if (type === 'year' && bookingYear === document.getElementById('selectedYear').value) {
+                        match = true;
+                    } else if (type === 'multi_years') {
+                        const yearsInput = document.getElementById('selectedYearsList').value;
+                        if (yearsInput) {
+                            const yearsArray = yearsInput.split(',').map(y => y.trim());
+                            if (yearsArray.includes(bookingYear)) {
+                                match = true;
+                            }
+                        }
+                    }
                 }
 
                 if (match) {
@@ -191,12 +249,10 @@
 
                     const amount = Number(data.amount) || 0;
                     
-                    // إذا لم يكن في السلة، يتم احتساب المبالغ الإجمالية
                     if (type !== 'basket') {
                         total += amount;
                     }
 
-                    // إذا كان في السلة، نعرض المبلغ كـ 0 أو شرطة لكي لا يتم حسابه
                     const displayAmount = (type === 'basket') ? '-' : amount;
                     const statusText = isRejected ? '<span style="color:red; font-weight:bold;">مرفوض</span>' : (data.status || 'نشط');
 
@@ -269,6 +325,13 @@
     }
 
     window.onload = () => {
+        // تعيين الشهر الحالي تلقائياً عند الفتح
+        const now = new Date();
+        const yr = now.getFullYear();
+        const mo = (now.getMonth() + 1).toString().padStart(2, '0');
+        document.getElementById('selectedMonth').value = `${yr}-${mo}`;
+        document.getElementById('filterType').value = 'month';
+        toggleFilterInputs();
         fetchBookings();
     };
 </script>

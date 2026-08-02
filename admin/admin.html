@@ -83,21 +83,6 @@
 
         .btn-ai { background-color: #d35400; }
         .btn-ai:hover { background-color: #ba4a00; }
-
-        .details-link {
-            display: inline-block;
-            margin-top: 8px;
-            padding: 5px 10px;
-            background-color: #2980b9;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .details-link:hover {
-            background-color: #1a5276;
-        }
     </style>
 </head>
 <body>
@@ -105,10 +90,8 @@
     <p class="admin-title" id="welcomeText">جاري التحميل...</p> 
 
     <div class="live-clock-box">
-        <h3>الوقت الحالي والحجز القائم</h3>
+        <h3>الوقت الحالي</h3>
         <p id="liveClock">--:--:-- --</p>
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
-        <p id="currentBookingStatus">جاري فحص الحجوزات الحالية...</p>
     </div> 
 
     <div class="admin-card">
@@ -140,7 +123,6 @@
         document.addEventListener("DOMContentLoaded", async () => {
             const welcomeText = document.getElementById("welcomeText");
             const liveClockElement = document.getElementById("liveClock");
-            const currentBookingElement = document.getElementById("currentBookingStatus"); 
 
             // تشغيل الساعة الحية
             function updateClock() {
@@ -159,7 +141,7 @@
             setInterval(updateClock, 1000);
             updateClock(); 
 
-            // جلب بيانات الأدمن (اللقب والاسم)
+            // جلب بيانات الأدمن (اللقب والاسم من قاعدة البيانات)
             const urlParams = new URLSearchParams(window.location.search);
             let adminId = urlParams.get("id");
 
@@ -181,7 +163,7 @@
                 }
 
                 if (adminData) {
-                    const title = adminData.title || adminData.prefix || "";
+                    const title = adminData.title || adminData.prefix || adminData.khatab || "";
                     const name = adminData.name || adminData.fullName || adminData.userName || "المشرف";
                     welcomeText.textContent = `أهلاً يا ${title} ${name}`.trim();
                 } else {
@@ -191,65 +173,6 @@
             } catch (error) {
                 console.error("خطأ في جلب بيانات الأدمن:", error);
                 welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
-            } 
-
-            // فحص وجلب الحجز القائم / أو حالة الحجوزات بشكل مرن من قاعدة البيانات
-            try {
-                const reservationsSnapshot = await db.collection("bookings").get();
-                let foundBooking = null; 
-
-                reservationsSnapshot.forEach(doc => {
-                    const resData = doc.data();
-                    // نبحث عن أي حجز نشط (مقبول أو قيد الانتظار)
-                    if (resData.status === "مقبول" || resData.status === "accepted" || resData.status === "قيد الانتظار" || resData.status === "pending") {
-                        foundBooking = { id: doc.id, ...resData };
-                    }
-                }); 
-
-                if (!foundBooking) {
-                    currentBookingElement.innerHTML = "<span style='color: #27ae60;'>لا توجد حجوزات نشطة حالياً.</span>";
-                } else {
-                    let timeDisplay = "محدد";
-                    if (foundBooking.slots && Array.isArray(foundBooking.slots) && foundBooking.slots.length > 0) {
-                        timeDisplay = `${foundBooking.slots[0].split(" - ")[0]} - ${foundBooking.slots[foundBooking.slots.length - 1].split(" - ")[1]}`;
-                    } else if (foundBooking.time) {
-                        timeDisplay = foundBooking.time;
-                    }
-
-                    const clientName = foundBooking.userName || foundBooking.name || "عميل";
-                    const clientPhone = foundBooking.userPhone || foundBooking.phone || "";
-                    const bookingDate = foundBooking.date || "";
-                    const status = foundBooking.status || "قيد الانتظار";
-
-                    let statusText = "";
-                    let colorStyle = "#f39c12";
-
-                    if (status === "مقبول" || status === "accepted") {
-                        statusText = "تم قبوله ✅";
-                        colorStyle = "#27ae60";
-                    } else if (status === "مرفوض" || status === "rejected") {
-                        if (foundBooking.replacementNote) {
-                            statusText = `تم رفضه واستبداله بـ: (${foundBooking.replacementNote}) ❌`;
-                        } else {
-                            statusText = "تم رفضه ولم يتم استبداله ❌";
-                        }
-                        colorStyle = "#c0392b";
-                    } else {
-                        statusText = "قيد الانتظار ⏳";
-                        colorStyle = "#f39c12";
-                    }
-
-                    currentBookingElement.innerHTML = `
-                        الحجز: <b style="color: ${colorStyle};">${timeDisplay}</b> (${bookingDate})<br>
-                        الحالة: <b>${statusText}</b><br>
-                        بواسطة: <b>${clientName}</b> (${clientPhone})<br>
-                        <a href="R2.html?id=${foundBooking.userId || ''}" class="details-link">معرفة التفاصيل بالكامل 🔍</a>
-                    `;
-                }
-
-            } catch (error) {
-                console.error("خطأ في جلب حالة الحجز الحالي:", error);
-                currentBookingElement.textContent = "تعذر جلب حالة الحجز الحالي.";
             }
         });
     </script>

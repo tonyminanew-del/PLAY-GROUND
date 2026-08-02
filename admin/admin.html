@@ -142,11 +142,11 @@
             updateClock(); 
 
             try {
+                // 1. البحث عن معرف الأدمن المحفوظ أثناء تسجيل الدخول أو من رابط الصفحة
                 const urlParams = new URLSearchParams(window.location.search);
-                let adminId = urlParams.get("id");
+                let adminId = urlParams.get("id") || localStorage.getItem("adminId") || sessionStorage.getItem("adminId");
                 let adminData = null;
 
-                // لو الرابط فيه ID هات المستند بتاعه مباشرة
                 if (adminId) {
                     const docRef = await db.collection("admins").doc(adminId).get();
                     if (docRef.exists) {
@@ -154,22 +154,24 @@
                     }
                 }
 
-                // لو مفيش ID في الرابط، هات أول مستند جوه جدول admins تلقائياً
+                // 2. إذا لم يتم العثور على المعرف، نبحث بالهاتف لو كان محفوظاً في الـ localStorage
                 if (!adminData) {
-                    const snapshot = await db.collection("admins").limit(1).get();
-                    if (!snapshot.empty) {
-                        adminData = snapshot.docs[0].data();
+                    let adminPhone = localStorage.getItem("adminPhone") || sessionStorage.getItem("adminPhone");
+                    if (adminPhone) {
+                        const querySnapshot = await db.collection("admins").where("phone", "==", adminPhone).get();
+                        if (!querySnapshot.empty) {
+                            adminData = querySnapshot.docs[0].data();
+                        }
                     }
                 }
 
+                // عرض الاسم واللقب لو البيانات وجدت
                 if (adminData) {
-                    // سحب الحقول الحقيقية الموجودة في قاعدة البيانات لديك (title و username)
                     const title = adminData.title || "";
                     const name = adminData.username || adminData.name || "المشرف";
-                    
                     welcomeText.textContent = `أهلاً يا ${title} ${name}`.trim();
                 } else {
-                    welcomeText.textContent = "لا توجد بيانات مسجلة للمشرف";
+                    welcomeText.textContent = "أهلاً يا مشرفنا العزيز (يرجى تسجيل الدخول مجدداً)";
                 }
 
             } catch (error) {

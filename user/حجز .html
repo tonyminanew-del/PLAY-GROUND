@@ -308,12 +308,48 @@
             "11:00 PM - 12:00 AM"
         ];
 
-        // 1. جلب البيانات من البيز
+        // جلب الـ ID من الرابط إن وجد
+        function getUserIdFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        // إظهار نص عدم وجود بيانات
+        function showNoDataState() {
+            const nameElem = document.getElementById("displayUserName");
+            const phoneElem = document.getElementById("displayUserPhone");
+            
+            fetchedUserName = "";
+            fetchedUserPhone = "";
+            nameElem.innerHTML = "<span style='color:red;'>لا توجد بيانات مسجلة</span>";
+            phoneElem.innerHTML = "<span style='color:red;'>لا توجد بيانات مسجلة</span>";
+        }
+
+        // 1. جلب البيانات من البيز بدون تخمين أو افتراضات
         async function fetchUserDataFromFirebase() {
             const nameElem = document.getElementById("displayUserName");
             const phoneElem = document.getElementById("displayUserPhone");
+            const urlId = getUserIdFromURL();
 
             try {
+                // المحاولة الأولى: عن طريق ID المحدد في رابط الصفحة
+                if (urlId) {
+                    const docRef = await db.collection("bookings").doc(urlId).get();
+                    if (docRef.exists) {
+                        const data = docRef.data();
+                        if (data && (data.userName || data.userPhone)) {
+                            userId = docRef.id;
+                            fetchedUserName = data.userName || "";
+                            fetchedUserPhone = data.userPhone || "";
+
+                            nameElem.innerText = fetchedUserName || "لا توجد بيانات مسجلة";
+                            phoneElem.innerText = fetchedUserPhone || "لا توجد بيانات مسجلة";
+                            return;
+                        }
+                    }
+                }
+
+                // المحاولة الثانية: في حال عدم وجود id بالرابط، يجلب أحدث عنصر
                 const snapshot = await db.collection("bookings")
                     .orderBy("createdAt", "desc")
                     .limit(1)
@@ -322,20 +358,24 @@
                 if (!snapshot.empty) {
                     const doc = snapshot.docs[0];
                     const data = doc.data();
-                    userId = doc.id;
-                    fetchedUserName = data.userName || "غير محدد";
-                    fetchedUserPhone = data.userPhone || "";
+                    
+                    if (data && (data.userName || data.userPhone)) {
+                        userId = doc.id;
+                        fetchedUserName = data.userName || "";
+                        fetchedUserPhone = data.userPhone || "";
 
-                    nameElem.innerText = fetchedUserName;
-                    phoneElem.innerText = fetchedUserPhone || "غير محدد";
-                } else {
-                    nameElem.innerHTML = "<span style='color:red;'>لا توجد بيانات مسجلة في البيز</span>";
-                    phoneElem.innerHTML = "<span style='color:red;'>لا توجد بيانات مسجلة في البيز</span>";
+                        nameElem.innerText = fetchedUserName || "لا توجد بيانات مسجلة";
+                        phoneElem.innerText = fetchedUserPhone || "لا توجد بيانات مسجلة";
+                        return;
+                    }
                 }
+
+                // لو مفيش أي بيانات مفيدة اتوجدت
+                showNoDataState();
+
             } catch (err) {
                 console.error("خطأ أثناء جلب البيانات من البيز:", err);
-                nameElem.innerHTML = "<span style='color:red;'>خطأ في جلب البيانات</span>";
-                phoneElem.innerHTML = "<span style='color:red;'>خطأ في جلب البيانات</span>";
+                showNoDataState();
             }
         }
 
@@ -460,7 +500,7 @@
                 renderAvailableTimes();
             });
 
-            // 4. كتابة الرسالة كما بالنموذج المطلوب وتمريرها مباشرة عبر wa.me
+            // 4. كتابة الرسالة وتمريرها عبر الواتساب
             bookingForm.addEventListener("submit", (e) => {
                 e.preventDefault();
 
@@ -485,8 +525,8 @@
                 const paymentText = selectedPaymentMethod === 'instapay' ? 'InstaPay' : 'الدفع في الملعب';
 
                 let messageText = `⚽ *حجز جديد - ملعب مارجرجس* ⚽%0A%0A` +
-                                  `👤 *الاسم:* ${encodeURIComponent(fetchedUserName || 'غير محدد')}%0A` +
-                                  `📞 *رقم الهاتف:* ${encodeURIComponent(fetchedUserPhone || 'غير محدد')}%0A` +
+                                  `👤 *الاسم:* ${encodeURIComponent(fetchedUserName || 'لا توجد بيانات مسجلة')}%0A` +
+                                  `📞 *رقم الهاتف:* ${encodeURIComponent(fetchedUserPhone || 'لا توجد بيانات مسجلة')}%0A` +
                                   `📅 *التاريخ:* ${bookingDate}%0A` +
                                   `⏰ *الوقت:* ${encodeURIComponent(fullTimeDisplay)}%0A` +
                                   `💳 *طريقة الدفع:* ${encodeURIComponent(paymentText)}%0A` +

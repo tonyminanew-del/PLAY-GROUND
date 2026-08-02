@@ -93,6 +93,13 @@
         .btn-result:hover {
             background-color: #d35400;
         }
+        /* تنسيق زر المساعد الذكي */
+        .btn-chat {
+            background-color: #8e44ad;
+        }
+        .btn-chat:hover {
+            background-color: #732d91;
+        }
     </style>
 </head>
 <body>
@@ -113,8 +120,8 @@
             <button type="button" id="profileBtn">الملف الشخصي (Profile)</button>
             <button type="button" id="bookingBtn" class="btn-booking">احجز الملعب</button>
             <button type="button" id="resultBtn" class="btn-result">متابعة حالة الحجز</button>
-            <button type="button" id="chatbtn" class="btn-result">tony ai</button>
-            
+            <!-- الزر الرابع الجديد -->
+            <button type="button" id="chatBtn" class="btn-chat">🤖 المساعد الذكي</button>
         </div>
     </div>
 
@@ -192,13 +199,11 @@
 
                 // 3. طباعة الاسم بشكل دقيق وبحث شامل في كل الاحتمالات الممكنة للحقول
                 if (userData) {
-                    // فحص جميع الحقول المحتملة للاسم في قاعدة البيانات
                     const realName = userData.name || userData.fullName || userData.userName || userData.username || userData.adminName || userData.firstName;
                     
                     if (realName) {
                         welcomeElement.textContent = `أهلاً يا ${realName}`;
                     } else {
-                        // إذا كانت البيانات موجودة لكن حقل الاسم فارغ، نطبع أول مفتاح أو قيمة نصية نجدها
                         welcomeElement.textContent = `أهلاً بك`;
                     }
                 } else {
@@ -237,15 +242,16 @@
                 window.location.href = currentUserId ? `profile.html?id=${currentUserId}` : "profile.html";
             });
 
-    document.getElementById("bookingBtn").addEventListener("click", () => {
-    window.location.href = currentUserId ? `حجز .html?id=${currentUserId}` : "حجز .html";
-});
+            document.getElementById("bookingBtn").addEventListener("click", () => {
+                window.location.href = currentUserId ? `حجز .html?id=${currentUserId}` : "حجز .html";
+            });
 
             document.getElementById("resultBtn").addEventListener("click", () => {
                 window.location.href = currentUserId ? `result.html?id=${currentUserId}` : "result.html";
             });
-        });
-                    document.getElementById("chatbtn").addEventListener("click", () => {
+
+            // تفعيل زر المساعد الذكي الانتقال إلى chat.html
+            document.getElementById("chatBtn").addEventListener("click", () => {
                 window.location.href = currentUserId ? `chat.html?id=${currentUserId}` : "chat.html";
             });
         });

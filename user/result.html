@@ -43,13 +43,14 @@
         .status-box {
             padding: 12px;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
-            margin: 10px 0 5px 0;
+            margin: 5px 0 0 0;
         }
         .pending { background-color: #f39c12; color: white; }
         .accepted { background-color: #27ae60; color: white; }
         .rejected { background-color: #c0392b; color: white; }
+        .expired { background-color: #7f8c8d; color: white; }
         
         .booking-details-list {
             background: #f8f9fa;
@@ -171,10 +172,34 @@
                     const userName = bookingData.userName || "غير مسجل";
                     const userPhone = bookingData.userPhone || "غير مسجل";
                     const bookingDate = bookingData.date || "غير محدد";
-                    const bookingTime = bookingData.time || "غير محدد";
+                    
+                    // معالجة عرض الساعات (سواء مصفوفة slots أو حقل time القديم)
+                    let displayTime = "غير محدد";
+                    if (bookingData.slots && Array.isArray(bookingData.slots) && bookingData.slots.length > 0) {
+                        const startStr = bookingData.slots[0].split(" - ")[0];
+                        const endStr = bookingData.slots[bookingData.slots.length - 1].split(" - ")[1];
+                        displayTime = `${startStr} - ${endStr}`;
+                    } else if (bookingData.time) {
+                        displayTime = bookingData.time;
+                    }
+
                     const paymentMethod = bookingData.paymentMethod === "instapay" ? "InstaPay 💳" : "الدفع في الملعب 🏟️";
-                    const amount = bookingData.amount ? `${bookingData.amount} جنيه` : "200 جنيه";
-                    const status = bookingData.status || "قيد الانتظار";
+                    
+                    // الحساب الدقيق للمبلغ الإجمالي
+                    const duration = bookingData.duration || 1;
+                    const amount = bookingData.totalAmount ? `${bookingData.totalAmount} جنيه` : `${duration * 200} جنيه`;
+                    
+                    let status = bookingData.status || "قيد الانتظار";
+
+                    // التحقق من مرور 24 ساعة على الحجز المعلق
+                    const now = new Date();
+                    if (status === "pending" && bookingData.createdAt) {
+                        const createdAtDate = bookingData.createdAt.toDate();
+                        const hoursDiff = (now - createdAtDate) / (1000 * 60 * 60);
+                        if (hoursDiff > 24) {
+                            status = "منتهي";
+                        }
+                    }
 
                     let statusClass = "pending";
                     let statusMsg = "⏳ قيد الانتظار (في انتظار مراجعة المسؤول)";
@@ -182,12 +207,15 @@
                     if (status === "مقبول") {
                         statusClass = "accepted";
                         statusMsg = "✅ تم قبول الحجز بنجاح!";
-                    } else if (status === "مرفوض") {
+                    } else if (status === "مرفوض" || status === "ملغي") {
                         statusClass = "rejected";
-                        statusMsg = "❌ عفواً، تم رفض طلب الحجز.";
+                        statusMsg = "❌ عفواً، تم رفض أو إلغاء طلب الحجز.";
+                    } else if (status === "منتهي") {
+                        statusClass = "expired";
+                        statusMsg = "⏰ انتهت المهلة (مر أكثر من 24 ساعة دون تأكيد)";
                     }
 
-                    // إظهار كافة تفاصيل الحجز
+                    // إظهار كافة تفاصيل الحجز بدقة واحترافية
                     resultContent.innerHTML = `
                         <div class="booking-details-list">
                             <div class="detail-item">
@@ -203,15 +231,19 @@
                                 <span class="value">${bookingDate}</span>
                             </div>
                             <div class="detail-item">
-                                <span class="label">⏰ الموعد:</span>
-                                <span class="value" style="direction: ltr;">${bookingTime}</span>
+                                <span class="label">⏰ الموعد (الساعات):</span>
+                                <span class="value" style="direction: ltr;">${displayTime}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">⏳ عدد الساعات:</span>
+                                <span class="value">${duration} ساعة</span>
                             </div>
                             <div class="detail-item">
                                 <span class="label">💳 طريقة الدفع:</span>
                                 <span class="value">${paymentMethod}</span>
                             </div>
                             <div class="detail-item">
-                                <span class="label">💰 المبلغ:</span>
+                                <span class="label">💰 المبلغ الإجمالي:</span>
                                 <span class="value" style="color: #27ae60;">${amount}</span>
                             </div>
                         </div>

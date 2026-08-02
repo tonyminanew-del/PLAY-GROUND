@@ -1,143 +1,257 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>admin page</title>
-    <link rel="stylesheet" href="../style.css">
-    <style>
-        .live-clock-box {
-            background: white;
-            color: #333;
-            padding: 15px 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
-            text-align: center;
-            width: 100%;
-            max-width: 400px;
-        }
-        .live-clock-box h3 {
-            margin: 0 0 8px 0;
-            color: #2980b9;
-            font-size: 18px;
-        }
-        .live-clock-box p {
-            margin: 5px 0;
-            font-size: 15px;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم الرئيسية</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        .admin-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .live-clock-box {
+            background: white;
+            color: #333;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            text-align: center;
+            width: 100%;
+            max-width: 420px;
+            box-sizing: border-box;
+        }
+        .live-clock-box h3 {
+            margin: 0 0 8px 0;
+            color: #2980b9;
+            font-size: 17px;
+        }
+        .live-clock-box p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .admin-card {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .btn-management { background-color: #3498db; }
+        .btn-management:hover { background-color: #2980b9; }
+        
+        .btn-profile { background-color: #8e44ad; }
+        .btn-profile:hover { background-color: #732d91; }
+        
+        .btn-money { background-color: #16a085; }
+        .btn-money:hover { background-color: #138d75; }
+
+        .btn-ai { background-color: #d35400; }
+        .btn-ai:hover { background-color: #ba4a00; }
+
+        .details-link {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 5px 10px;
+            background-color: #2980b9;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .details-link:hover {
+            background-color: #1a5276;
+        }
+    </style>
 </head>
 <body>
-    <!-- جملة الترحيب -->
-    <p class="title" id="welcomeText">جاري التحميل...</p> 
 
-    <!-- صندوق الساعة الحية والحجز الحالي -->
-    <div class="live-clock-box">
-        <h3>الوقت الحالي والحجز القائم</h3>
-        <p id="liveClock">--:--:-- --</p>
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
-        <p id="currentBookingStatus">جاري فحص الحجوزات الحالية...</p>
-    </div> 
+    <p class="admin-title" id="welcomeText">جاري التحميل...</p> 
 
-    <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 400px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
-        <form action="managment.html" method="get">
-            <button type="submit" style="width: 100%;">إدارة الحجوزات</button>
-        </form>
-        
-        
-        
-        <form action="profile.html" method="get">
-            <button type="submit" style="width: 100%; background-color: #8e44ad;">profile</button>
-        </form>
-    </div> 
+    <div class="live-clock-box">
+        <h3>الوقت الحالي والحجز القائم</h3>
+        <p id="liveClock">--:--:-- --</p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+        <p id="currentBookingStatus">جاري فحص الحجوزات الحالية...</p>
+    </div> 
 
-    <!-- استدعاء مكتبات فايربيس -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script> 
+    <div class="admin-card">
+        <button type="button" class="btn-management" onclick="location.href='managment.html'">إدارة الحجوزات ⚙️</button>
+        <button type="button" class="btn-money" onclick="location.href='money.html'">التقارير المالية 📊</button>
+        <button type="button" class="btn-ai" onclick="location.href='ai.html'">🤖 المساعد الذكي (AI)</button>
+        <button type="button" class="btn-profile" onclick="location.href='profile.html'">الملف الشخصي 👤</button>
+    </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBGM0xBeu0wc2JV_4hgymDMDi1jlltf8SI",
-            authDomain: "marygrgs.firebaseapp.com",
-            projectId: "marygrgs",
-            storageBucket: "marygrgs.firebasestorage.app",
-            messagingSenderId: "866893606556",
-            appId: "1:866893606556:web:d2b7bab1c8dcd8fd038759",
-            measurementId: "G-YRH69L594N"
-        }; 
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script> 
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(); 
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGM0xBeu0wc2JV_4hgymDMDi1jlltf8SI",
+            authDomain: "marygrgs.firebaseapp.com",
+            projectId: "marygrgs",
+            storageBucket: "marygrgs.firebasestorage.app",
+            messagingSenderId: "866893606556",
+            appId: "1:866893606556:web:d2b7bab1c8dcd8fd038759",
+            measurementId: "G-YRH69L594N"
+        };
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            const welcomeText = document.getElementById("welcomeText");
-            const liveClockElement = document.getElementById("liveClock");
-            const currentBookingElement = document.getElementById("currentBookingStatus"); 
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore(); 
 
-            // 1. تشغيل الساعة الحية (ساعات، دقائق، ثواني مع AM/PM)
-            function updateClock() {
-                const now = new Date();
-                let hours = now.getHours();
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
-                const ampm = hours >= 12 ? 'PM' : 'AM';
-                
-                hours = hours % 12;
-                hours = hours ? hours : 12; // الساعة 0 تصبح 12
-                const formattedHours = String(hours).padStart(2, '0'); 
+        document.addEventListener("DOMContentLoaded", async () => {
+            const welcomeText = document.getElementById("welcomeText");
+            const liveClockElement = document.getElementById("liveClock");
+            const currentBookingElement = document.getElementById("currentBookingStatus"); 
 
-                liveClockElement.textContent = `${formattedHours}:${minutes}:${seconds} ${ampm}`;
-            }
-            setInterval(updateClock, 1000);
-            updateClock(); 
+            // تشغيل الساعة الحية
+            function updateClock() {
+                const now = new Date();
+                let hours = now.getHours();
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                
+                hours = hours % 12;
+                hours = hours ? hours : 12; 
+                const formattedHours = String(hours).padStart(2, '0'); 
 
-            // 2. جلب الترحيب بالأدمن من قاعدة البيانات
-            try {
-                const snapshot = await db.collection("admins")
-                    .orderBy("createdAt", "desc")
-                    .limit(1)
-                    .get(); 
+                liveClockElement.textContent = `${formattedHours}:${minutes}:${seconds} ${ampm}`;
+            }
+            setInterval(updateClock, 1000);
+            updateClock(); 
 
-                if (!snapshot.empty) {
-                    const data = snapshot.docs[0].data();
-                    welcomeText.textContent = `أهلاً يا ${data.title || ""} ${data.name || ""}`;
-                } else {
-                    welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
-                }
-            } catch (error) {
-                console.error("خطأ في جلب بيانات الأدمن:", error);
-                welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
-            } 
+            // جلب بيانات الأدمن (اللقب والاسم)
+            const urlParams = new URLSearchParams(window.location.search);
+            let adminId = urlParams.get("id");
 
-            // 3. التحقق من الحجز الموجود حالياً في قاعدة البيانات
-            try {
-                const reservationsSnapshot = await db.collection("reservations").get();
-                let activeBookingFound = false; 
+            try {
+                let adminData = null;
 
-                reservationsSnapshot.forEach(doc => {
-                    const resData = doc.data();
-                    // لو الحجز مقبول، يمكنك مقارنة الوقت هنا أو عرض الحجوزات النشطة اليوم
-                    if (resData.status === "مقبول") {
-                        // كمثال: نعرض تفاصيل الحجز الحالي المسجل
-                        // يمكنك مطابقة الوقت الحالي مع نطاق الساعات لو حبيت
-                        activeBookingFound = true;
-                        currentBookingElement.innerHTML = `الحجز الحالي: <b style="color: #c0392b;">${resData.time || resData.details}</b><br>بواسطة: <b>${resData.name}</b> (${resData.phone})`;
-                    }
-                }); 
+                if (adminId) {
+                    const docRef = await db.collection("admins").doc(adminId).get();
+                    if (docRef.exists) {
+                        adminData = docRef.data();
+                    }
+                }
 
-                if (!activeBookingFound) {
-                    currentBookingElement.innerHTML = "<span style='color: #27ae60;'>لا توجد حجوزات نشطة في هذه اللحظة.</span>";
-                } 
+                if (!adminData) {
+                    const snapshot = await db.collection("admins").limit(1).get();
+                    if (!snapshot.empty) {
+                        adminData = snapshot.docs[0].data();
+                    }
+                }
 
-            } catch (error) {
-                console.error("خطأ في جلب حالة الحجز الحالي:", error);
-                currentBookingElement.textContent = "تعذر جلب حالة الحجز الحالي.";
-            }
-        });
-    </script>
-       <form action="money.html" method="get">
-            <button type="submit" style="width: 100%; background-color: #14967a;">تقارير</button>
-        </form>
-    </div>
+                if (adminData) {
+                    const title = adminData.title || adminData.prefix || "";
+                    const name = adminData.name || adminData.fullName || adminData.userName || "المشرف";
+                    welcomeText.textContent = `أهلاً يا ${title} ${name}`.trim();
+                } else {
+                    welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
+                }
+
+            } catch (error) {
+                console.error("خطأ في جلب بيانات الأدمن:", error);
+                welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
+            } 
+
+            // فحص وجلب الحجز القائم / أو حالة الحجوزات بشكل مرن من قاعدة البيانات
+            try {
+                const reservationsSnapshot = await db.collection("bookings").get();
+                let foundBooking = null; 
+
+                reservationsSnapshot.forEach(doc => {
+                    const resData = doc.data();
+                    // نبحث عن أي حجز نشط (مقبول أو قيد الانتظار)
+                    if (resData.status === "مقبول" || resData.status === "accepted" || resData.status === "قيد الانتظار" || resData.status === "pending") {
+                        foundBooking = { id: doc.id, ...resData };
+                    }
+                }); 
+
+                if (!foundBooking) {
+                    currentBookingElement.innerHTML = "<span style='color: #27ae60;'>لا توجد حجوزات نشطة حالياً.</span>";
+                } else {
+                    let timeDisplay = "محدد";
+                    if (foundBooking.slots && Array.isArray(foundBooking.slots) && foundBooking.slots.length > 0) {
+                        timeDisplay = `${foundBooking.slots[0].split(" - ")[0]} - ${foundBooking.slots[foundBooking.slots.length - 1].split(" - ")[1]}`;
+                    } else if (foundBooking.time) {
+                        timeDisplay = foundBooking.time;
+                    }
+
+                    const clientName = foundBooking.userName || foundBooking.name || "عميل";
+                    const clientPhone = foundBooking.userPhone || foundBooking.phone || "";
+                    const bookingDate = foundBooking.date || "";
+                    const status = foundBooking.status || "قيد الانتظار";
+
+                    let statusText = "";
+                    let colorStyle = "#f39c12";
+
+                    if (status === "مقبول" || status === "accepted") {
+                        statusText = "تم قبوله ✅";
+                        colorStyle = "#27ae60";
+                    } else if (status === "مرفوض" || status === "rejected") {
+                        if (foundBooking.replacementNote) {
+                            statusText = `تم رفضه واستبداله بـ: (${foundBooking.replacementNote}) ❌`;
+                        } else {
+                            statusText = "تم رفضه ولم يتم استبداله ❌";
+                        }
+                        colorStyle = "#c0392b";
+                    } else {
+                        statusText = "قيد الانتظار ⏳";
+                        colorStyle = "#f39c12";
+                    }
+
+                    currentBookingElement.innerHTML = `
+                        الحجز: <b style="color: ${colorStyle};">${timeDisplay}</b> (${bookingDate})<br>
+                        الحالة: <b>${statusText}</b><br>
+                        بواسطة: <b>${clientName}</b> (${clientPhone})<br>
+                        <a href="user/result.html?id=${foundBooking.userId || ''}" class="details-link">معرفة التفاصيل بالكامل 🔍</a>
+                    `;
+                }
+
+            } catch (error) {
+                console.error("خطأ في جلب حالة الحجز الحالي:", error);
+                currentBookingElement.textContent = "تعذر جلب حالة الحجز الحالي.";
+            }
+        });
+    </script>
+</body>
 </html>

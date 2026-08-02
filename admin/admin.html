@@ -142,36 +142,35 @@
             updateClock(); 
 
             try {
-                // 1. البحث عن معرف الأدمن المحفوظ أثناء تسجيل الدخول أو من رابط الصفحة
+                // 1. جلب اسم المستخدم من رابط الصفحة (URL) أو من الـ localStorage الذي تم حفظه عند تسجيل الدخول
                 const urlParams = new URLSearchParams(window.location.search);
-                let adminId = urlParams.get("id") || localStorage.getItem("adminId") || sessionStorage.getItem("adminId");
-                let adminData = null;
+                let currentUsername = urlParams.get("username") || localStorage.getItem("adminUsername");
 
-                if (adminId) {
-                    const docRef = await db.collection("admins").doc(adminId).get();
-                    if (docRef.exists) {
-                        adminData = docRef.data();
-                    }
+                if (!currentUsername) {
+                    welcomeText.textContent = "يرجى تسجيل الدخول أولاً";
+                    return;
                 }
 
-                // 2. إذا لم يتم العثور على المعرف، نبحث بالهاتف لو كان محفوظاً في الـ localStorage
-                if (!adminData) {
-                    let adminPhone = localStorage.getItem("adminPhone") || sessionStorage.getItem("adminPhone");
-                    if (adminPhone) {
-                        const querySnapshot = await db.collection("admins").where("phone", "==", adminPhone).get();
-                        if (!querySnapshot.empty) {
-                            adminData = querySnapshot.docs[0].data();
-                        }
-                    }
-                }
+                // 2. البحث المباشر في قاعدة البيانات في جدول admins عن اسم المستخدم المسجل
+                const snapshot = await db.collection("admins")
+                    .where("username", "==", currentUsername)
+                    .get();
 
-                // عرض الاسم واللقب لو البيانات وجدت
-                if (adminData) {
-                    const title = adminData.title || "";
-                    const name = adminData.username || adminData.name || "المشرف";
-                    welcomeText.textContent = `أهلاً يا ${title} ${name}`.trim();
+                if (!snapshot.empty) {
+                    // أخذ أول نتيجة مطابقة
+                    const adminData = snapshot.docs[0].data();
+                    const title = adminData.title || ""; // (ابونا، تاسوني، اخ)
+                    const username = adminData.username || "المشرف";
+                    
+                    welcomeText.textContent = `أهلاً يا ${title} ${username}`.trim();
                 } else {
-                    welcomeText.textContent = "أهلاً يا مشرفنا العزيز (يرجى تسجيل الدخول مجدداً)";
+                    // احتياطي لو الاسم مخزن مسبقاً في الـ localStorage
+                    let localTitle = localStorage.getItem("adminTitle") || "";
+                    if (currentUsername) {
+                        welcomeText.textContent = `أهلاً يا ${localTitle} ${currentUsername}`.trim();
+                    } else {
+                        welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
+                    }
                 }
 
             } catch (error) {

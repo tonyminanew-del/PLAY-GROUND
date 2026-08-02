@@ -295,10 +295,9 @@
 
                     <div style="font-size: 12px; color: #64748b; margin-top: 8px;">لتحميل تطبيق إنستاباي:</div>
                     <div class="store-links">
-    <a href="https://play.google.com/store/apps" target="_blank" class="store-btn">Google Play 🎮</a>
-    <a href="https://www.apple.com/app-store/" target="_blank" class="store-btn">App Store 🍏</a>
-</div>
-
+                        <a href="https://play.google.com/store/apps/details?id=com.eg.cupp.payments" target="_blank" class="store-btn">Google Play 🎮</a>
+                        <a href="https://apps.apple.com/eg/app/instapay-egypt/id1593121575" target="_blank" class="store-btn">App Store 🍏</a>
+                    </div>
 
                     <div class="instapay-instructions">
                         💡 <strong>تعليمات التحويل:</strong> قم بالتحويل على الرقم أعلاه، ثم اضغط على زر التأكيد أدناه وأرسل <strong>صورة إيصال التحويل (Screenshot)</strong> عبر الواتساب.
@@ -352,6 +351,19 @@
             "09:00 PM - 10:00 PM",
             "10:00 PM - 11:00 PM",
             "11:00 PM - 12:00 AM"
+        ];
+
+        // مصفوفة تحويل الساعات لتعامل رقمي دقيق لمقارنة وقت اليوم الحالي
+        const slotHourValues = [
+            { start: 15, end: 16 }, // 03:00 PM - 04:00 PM
+            { start: 16, end: 17 }, // 04:00 PM - 05:00 PM
+            { start: 17, end: 18 }, // 05:00 PM - 06:00 PM
+            { start: 18, end: 19 }, // 06:00 PM - 07:00 PM
+            { start: 19, end: 20 }, // 07:00 PM - 08:00 PM
+            { start: 20, end: 21 }, // 08:00 PM - 09:00 PM
+            { start: 21, end: 22 }, // 09:00 PM - 10:00 PM
+            { start: 22, end: 23 }, // 10:00 PM - 11:00 PM
+            { start: 23, end: 24 }  // 11:00 PM - 12:00 AM
         ];
 
         function getUserIdFromURL() {
@@ -429,16 +441,43 @@
             timeSelect.innerHTML = '<option value="">اختر الوقت المناسب</option>';
             let availableCount = 0;
 
+            // الحصول على التاريخ والوقت الحالي للمقارنة إذا كان الحجز اليوم
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            const currentHour = now.getHours();
+            const isToday = (dateInput.value === todayStr);
+
             for (let i = 0; i < allTimeSlots.length; i++) {
                 let canBook = true;
                 
-                if (i + selectedDuration > allTimeSlots.length) {
-                    canBook = false;
-                } else {
-                    for (let j = 0; j < selectedDuration; j++) {
-                        if (currentBookedSlots.includes(allTimeSlots[i + j])) {
-                            canBook = false;
-                            break;
+                // منع حجز الساعات التي انقضى وقتها اليوم بالفعل
+                if (isToday) {
+                    let slotStartHour = slotHourValues[i].start;
+                    if (slotStartHour <= currentHour) {
+                        canBook = false;
+                    }
+                }
+
+                if (canBook) {
+                    if (i + selectedDuration > allTimeSlots.length) {
+                        canBook = false;
+                    } else {
+                        // التحقق إضافياً إذا كان أحد خانات المدة قد مر وقته اليوم
+                        if (isToday) {
+                            for (let j = 0; j < selectedDuration; j++) {
+                                if (slotHourValues[i + j].start <= currentHour) {
+                                    canBook = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // التحقق من الحجوزات الموجودة بقاعدة البيانات
+                        for (let j = 0; j < selectedDuration; j++) {
+                            if (currentBookedSlots.includes(allTimeSlots[i + j])) {
+                                canBook = false;
+                                break;
+                            }
                         }
                     }
                 }
@@ -457,7 +496,7 @@
             }
 
             if (availableCount === 0) {
-                timeSelect.innerHTML = '<option value="">لا توجد مواعيد متاحة لهذه المدة في هذا اليوم</option>';
+                timeSelect.innerHTML = '<option value="">لا توجد مواعيد متاحة لهذه المدة (انقضت الساعات أو محجوزة)</option>';
             }
         }
 
@@ -508,6 +547,10 @@
             const dateInput = document.getElementById("bookingDate");
             const durationSelect = document.getElementById("bookingDuration");
             const bookingForm = document.getElementById("bookingForm");
+
+            // منع اختيار تواريخ سابقة من تقويم المتصفح
+            const todayStr = new Date().toISOString().split('T')[0];
+            dateInput.setAttribute('min', todayStr);
 
             dateInput.addEventListener("change", () => {
                 const selectedDate = dateInput.value;

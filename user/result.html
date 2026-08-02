@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تفاصيل وحالة الحجز</title>
+    <title>تفاصيل وحالة الحجوزات</title>
     <link rel="stylesheet" href="../style.css">
     <style>
         body {
@@ -20,7 +20,7 @@
         }
         .container {
             width: 100%;
-            max-width: 450px;
+            max-width: 480px;
             background: white;
             color: #333;
             padding: 25px;
@@ -33,42 +33,40 @@
             box-sizing: border-box;
         }
         .title {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
             color: #2c3e50;
             margin: 0 0 5px 0;
             border-bottom: 2px solid #eee;
             padding-bottom: 10px;
         }
-        .status-box {
-            padding: 12px;
+        .notice-count {
+            background: #e8f4fd;
+            border: 1px solid #bbe1fa;
+            color: #0c5460;
+            padding: 10px;
             border-radius: 8px;
-            font-size: 15px;
             font-weight: bold;
-            margin: 5px 0 0 0;
+            font-size: 14px;
         }
-        .pending { background-color: #f39c12; color: white; }
-        .accepted { background-color: #27ae60; color: white; }
-        .rejected { background-color: #c0392b; color: white; }
-        .expired { background-color: #7f8c8d; color: white; }
-        
-        .booking-details-list {
+        .booking-card-item {
             background: #f8f9fa;
             border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 12px 15px;
+            border-radius: 10px;
+            padding: 14px;
             text-align: right;
             display: flex;
             flex-direction: column;
             gap: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
         .detail-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 14px;
+            font-size: 13px;
             border-bottom: 1px dashed #e2e8f0;
-            padding-bottom: 6px;
+            padding-bottom: 5px;
         }
         .detail-item:last-child {
             border-bottom: none;
@@ -82,6 +80,17 @@
             color: #1e293b;
             font-weight: bold;
         }
+        .status-box {
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .pending { background-color: #f39c12; color: white; }
+        .accepted { background-color: #27ae60; color: white; }
+        .rejected { background-color: #c0392b; color: white; }
+        .expired { background-color: #7f8c8d; color: white; }
 
         .back-btn {
             background-color: #7f8c8d;
@@ -104,10 +113,10 @@
 <body>
 
     <div class="container">
-        <p class="title">تفاصيل وحالة الحجز</p>
+        <p class="title">تفاصيل وحالة حجوزاتك</p>
         
         <div id="resultContent">
-            <p style="color: #666; font-size: 15px;">جاري جلب تفاصيل الحجز من قاعدة البيانات...</p>
+            <p style="color: #666; font-size: 15px;">جاري جلب حجوزاتك من قاعدة البيانات...</p>
         </div>
 
         <button type="button" id="backBtn" class="back-btn">العودة للرئيسية</button>
@@ -150,11 +159,11 @@
                 }
 
                 if (!userId) {
-                    resultContent.innerHTML = "<p style='color: #c0392b; font-weight: bold;'>عفواً، لا يوجد مستخدم محدد لعرض حجزه.</p>";
+                    resultContent.innerHTML = "<p style='color: #c0392b; font-weight: bold;'>عفواً، لا يوجد مستخدم محدد لعرض حجوزاته.</p>";
                     return;
                 }
 
-                // جلب حجوزات هذا المستخدم
+                // جلب كافة حجوزات هذا المستخدم دون استثناء
                 const bookingSnapshot = await db.collection("bookings")
                     .where("userId", "==", userId)
                     .get();
@@ -167,91 +176,94 @@
                         bookings.push(doc.data());
                     });
 
-                    // اختيار أحدث حجز تم عمله
-                    const bookingData = bookings[bookings.length - 1];
-                    const userName = bookingData.userName || "غير مسجل";
-                    const userPhone = bookingData.userPhone || "غير مسجل";
-                    const bookingDate = bookingData.date || "غير محدد";
-                    
-                    // معالجة عرض الساعات (سواء مصفوفة slots أو حقل time القديم)
-                    let displayTime = "غير محدد";
-                    if (bookingData.slots && Array.isArray(bookingData.slots) && bookingData.slots.length > 0) {
-                        const startStr = bookingData.slots[0].split(" - ")[0];
-                        const endStr = bookingData.slots[bookingData.slots.length - 1].split(" - ")[1];
-                        displayTime = `${startStr} - ${endStr}`;
-                    } else if (bookingData.time) {
-                        displayTime = bookingData.time;
-                    }
-
-                    const paymentMethod = bookingData.paymentMethod === "instapay" ? "InstaPay 💳" : "الدفع في الملعب 🏟️";
-                    
-                    // الحساب الدقيق للمبلغ الإجمالي
-                    const duration = bookingData.duration || 1;
-                    const amount = bookingData.totalAmount ? `${bookingData.totalAmount} جنيه` : `${duration * 200} جنيه`;
-                    
-                    let status = bookingData.status || "قيد الانتظار";
-
-                    // التحقق من مرور 24 ساعة على الحجز المعلق
+                    // تصفية الحجوزات النشطة فقط (غير المنتهية أو الملغية إذا رغبت، أو عرض الكل بشكل تفصيلي)
                     const now = new Date();
-                    if (status === "pending" && bookingData.createdAt) {
-                        const createdAtDate = bookingData.createdAt.toDate();
-                        const hoursDiff = (now - createdAtDate) / (1000 * 60 * 60);
-                        if (hoursDiff > 24) {
-                            status = "منتهي";
+                    let activeBookings = [];
+
+                    bookings.forEach(b => {
+                        let currentStatus = b.status || "قيد الانتظار";
+                        
+                        // فحص إذا مر 24 ساعة على الحجز المعلق
+                        if (currentStatus === "pending" && b.createdAt) {
+                            const createdAtDate = b.createdAt.toDate();
+                            const hoursDiff = (now - createdAtDate) / (1000 * 60 * 60);
+                            if (hoursDiff > 24) {
+                                currentStatus = "منتهي";
+                            }
                         }
+
+                        // إذا أردت عرض الحجوزات النشطة أو التي لم تنتهي بعد
+                        if (currentStatus !== "منتهي" && currentStatus !== "ملغي") {
+                            b.calculatedStatus = currentStatus;
+                            activeBookings.push(b);
+                        }
+                    });
+
+                    if (activeBookings.length === 0) {
+                        resultContent.innerHTML = "<p style='color: #555; font-size: 15px;'>ليس لديك حجوزات نشطة حالياً (يمكنك مراجعة الحجوزات السابقة).</p>";
+                    } else {
+                        let htmlOutput = `<div class="notice-count">📌 يوجد لديك (${activeBookings.length}) حجز نشط:</div>`;
+
+                        activeBookings.forEach((bookingData, index) => {
+                            const userName = bookingData.userName || "غير مسجل";
+                            const userPhone = bookingData.userPhone || "غير مسجل";
+                            const bookingDate = bookingData.date || "غير محدد";
+                            
+                            let displayTime = "غير محدد";
+                            if (bookingData.slots && Array.isArray(bookingData.slots) && bookingData.slots.length > 0) {
+                                const startStr = bookingData.slots[0].split(" - ")[0];
+                                const endStr = bookingData.slots[bookingData.slots.length - 1].split(" - ")[1];
+                                displayTime = `${startStr} - ${endStr}`;
+                            } else if (bookingData.time) {
+                                displayTime = bookingData.time;
+                            }
+
+                            const paymentMethod = bookingData.paymentMethod === "instapay" ? "InstaPay 💳" : "الدفع في الملعب 🏟️";
+                            const duration = bookingData.duration || 1;
+                            const amount = bookingData.totalAmount ? `${bookingData.totalAmount} جنيه` : `${duration * 200} جنيه`;
+                            
+                            const status = bookingData.calculatedStatus;
+                            let statusClass = "pending";
+                            let statusMsg = "⏳ قيد الانتظار (في انتظار المراجعة)";
+
+                            if (status === "مقبول") {
+                                statusClass = "accepted";
+                                statusMsg = "✅ تم قبول الحجز بنجاح!";
+                            } else if (status === "مرفوض") {
+                                statusClass = "rejected";
+                                statusMsg = "❌ تم رفض طلب الحجز.";
+                            }
+
+                            htmlOutput += `
+                                <div class="booking-card-item">
+                                    <div style="font-weight: bold; color: #2c3e50; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 4px;">
+                                        حجز رقم (${index + 1})
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">📅 التاريخ:</span>
+                                        <span class="value">${bookingDate}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">⏰ الساعات:</span>
+                                        <span class="value" style="direction: ltr;">${displayTime}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">⏳ المدة والمبلغ:</span>
+                                        <span class="value">${duration} ساعة (${amount})</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">💳 الدفع:</span>
+                                        <span class="value">${paymentMethod}</span>
+                                    </div>
+                                    <div class="status-box ${statusClass}">
+                                        ${statusMsg}
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        resultContent.innerHTML = htmlOutput;
                     }
-
-                    let statusClass = "pending";
-                    let statusMsg = "⏳ قيد الانتظار (في انتظار مراجعة المسؤول)";
-
-                    if (status === "مقبول") {
-                        statusClass = "accepted";
-                        statusMsg = "✅ تم قبول الحجز بنجاح!";
-                    } else if (status === "مرفوض" || status === "ملغي") {
-                        statusClass = "rejected";
-                        statusMsg = "❌ عفواً، تم رفض أو إلغاء طلب الحجز.";
-                    } else if (status === "منتهي") {
-                        statusClass = "expired";
-                        statusMsg = "⏰ انتهت المهلة (مر أكثر من 24 ساعة دون تأكيد)";
-                    }
-
-                    // إظهار كافة تفاصيل الحجز بدقة واحترافية
-                    resultContent.innerHTML = `
-                        <div class="booking-details-list">
-                            <div class="detail-item">
-                                <span class="label">👤 اسم العميل:</span>
-                                <span class="value">${userName}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">📞 رقم الهاتف:</span>
-                                <span class="value" style="direction: ltr;">${userPhone}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">📅 تاريخ الحجز:</span>
-                                <span class="value">${bookingDate}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">⏰ الموعد (الساعات):</span>
-                                <span class="value" style="direction: ltr;">${displayTime}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">⏳ عدد الساعات:</span>
-                                <span class="value">${duration} ساعة</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">💳 طريقة الدفع:</span>
-                                <span class="value">${paymentMethod}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">💰 المبلغ الإجمالي:</span>
-                                <span class="value" style="color: #27ae60;">${amount}</span>
-                            </div>
-                        </div>
-
-                        <div class="status-box ${statusClass}">
-                            ${statusMsg}
-                        </div>
-                    `;
                 }
 
                 document.getElementById("backBtn").addEventListener("click", () => {
@@ -259,8 +271,8 @@
                 });
 
             } catch (error) {
-                console.error("خطأ في جلب حالة الحجز:", error);
-                resultContent.innerHTML = `<p style='color: #c0392b;'>حدث خطأ أثناء تحميل بيانات الحجز: ${error.message}</p>`;
+                console.error("خطأ في جلب الحجوزات:", error);
+                resultContent.innerHTML = `<p style='color: #c0392b;'>حدث خطأ أثناء تحميل الحجوزات: ${error.message}</p>`;
             }
         });
     </script>

@@ -113,6 +113,8 @@
             <button type="button" id="profileBtn">الملف الشخصي (Profile)</button>
             <button type="button" id="bookingBtn" class="btn-booking">احجز الملعب</button>
             <button type="button" id="resultBtn" class="btn-result">متابعة حالة الحجز</button>
+            <button type="button" id="chatbtn" class="btn-result">tony ai</button>
+            
         </div>
     </div>
 
@@ -241,6 +243,10 @@
 
             document.getElementById("resultBtn").addEventListener("click", () => {
                 window.location.href = currentUserId ? `result.html?id=${currentUserId}` : "result.html";
+            });
+        });
+                    document.getElementById("chatbtn").addEventListener("click", () => {
+                window.location.href = currentUserId ? `chat.html?id=${currentUserId}` : "chat.html";
             });
         });
     </script>

@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الصفحة الرئيسية للمستخدم</title>
+    <title>حجز الملعب</title>
     <link rel="stylesheet" href="../style.css">
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #2c3e50;
             color: #fff;
-            padding: 20px;
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            padding: 20px 0;
         }
         .container {
             width: 100%;
@@ -25,107 +25,296 @@
             color: #333;
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             display: flex;
             flex-direction: column;
             gap: 15px;
             box-sizing: border-box;
         }
-        h2 {
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
             color: #2c3e50;
             margin: 0 0 5px 0;
         }
-        .info-box {
-            background-color: #f8f9fa;
+        .user-info-card {
+            background: #f8f9fa;
             border: 1px solid #e9ecef;
-            padding: 12px;
             border-radius: 8px;
-            text-align: right;
-            font-size: 14px;
-            color: #495057;
+            padding: 12px 15px;
+            text-align: center;
+            color: #2c3e50;
+        }
+        .user-info-card p {
+            margin: 4px 0;
+            font-size: 15px;
+        }
+        .user-info-card strong {
+            color: #27ae60;
+        }
+        .input-group {
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
-        .info-box span {
+        label {
             font-weight: bold;
-            color: #2980b9;
+            font-size: 14px;
+            color: #333;
+            text-align: right;
         }
-        .clock-box {
-            font-size: 15px;
-            font-weight: bold;
-            color: #e67e22;
-            background: #fdf3e7;
-            padding: 8px;
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
             border-radius: 6px;
-            border: 1px solid #f5cba7;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
         }
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+        input:focus, select:focus {
+            border-color: #27ae60;
+        }
+        
+        .payment-section {
+            border-top: 2px dashed #eee;
+            padding-top: 12px;
             margin-top: 5px;
         }
-        button {
-            background-color: #3498db;
+        .payment-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            text-align: right;
+        }
+        .payment-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .payment-btn {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: #f8fafc;
+            color: #333;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .payment-btn.active {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+        }
+        
+        .instapay-box {
+            display: none;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 13px;
+            color: #1e293b;
+            margin-top: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .instapay-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+        .instapay-logo {
+            font-weight: bold;
+            color: #5c2d91;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .instapay-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .instapay-row span:first-child {
+            color: #64748b;
+        }
+        .instapay-row span:last-child {
+            font-weight: bold;
+            color: #0f172a;
+        }
+        .store-links {
+            display: flex;
+            gap: 6px;
+            margin: 10px 0 5px 0;
+        }
+        .store-btn {
+            flex: 1;
+            padding: 8px;
+            background: #0f172a;
+            color: #fff;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 11px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .instapay-instructions {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        .notice-banner {
+            background: #fff3cd;
+            border: 2px solid #ffeba2;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .notice-banner p {
+            margin: 0;
+            color: #856404;
+            font-size: 13px;
+            font-weight: bold;
+            line-height: 1.5;
+        }
+        .notice-banner span {
+            display: block;
+            font-size: 13px;
+            color: #d39e00;
+            margin-top: 4px;
+        }
+
+        button[type="submit"] {
+            background-color: #27ae60;
             color: white;
             border: none;
             padding: 12px;
             border-radius: 6px;
-            font-size: 16px;
+            font-size: 15px;
+            font-weight: bold;
             cursor: pointer;
             width: 100%;
             transition: background 0.3s;
         }
-        button:hover {
-            background-color: #2980b9;
-        }
-        .btn-booking {
-            background-color: #27ae60;
-        }
-        .btn-booking:hover {
+        button[type="submit"]:hover {
             background-color: #219653;
         }
-        .btn-result {
-            background-color: #e67e22;
+        .back-btn {
+            background-color: #7f8c8d;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 5px;
         }
-        .btn-result:hover {
-            background-color: #d35400;
-        }
-        /* تنسيق زر المساعد الذكي */
-        .btn-chat {
-            background-color: #8e44ad;
-        }
-        .btn-chat:hover {
-            background-color: #732d91;
+        .back-btn:hover {
+            background-color: #616a6b;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- المكان الذي سيظهر فيه الاسم الحقيقي -->
-        <h2 id="welcomeUser">جاري تحميل الاسم...</h2>
+        <p class="title">حجز موعد للملعب</p>
 
-        <!-- الساعة والدقيقة والثانية والتاريخ -->
-        <div class="clock-box" id="liveClock">جاري تحديث الوقت...</div>
-
-        <div class="info-box">
-            <div>📅 <strong>تاريخ اليوم:</strong> <span id="currentDateText">جاري الحساب...</span></div>
-            <div>⚽ <strong>حجزك القادم:</strong> <span id="nextBookingText">جاري البحث عن حجز...</span></div>
+        <div class="user-info-card">
+            <p>الاسم: <strong id="displayUserName">جاري جلب البيانات...</strong></p>
+            <p>رقم الهاتف: <strong id="displayUserPhone">جاري جلب البيانات...</strong></p>
         </div>
+        
+        <form id="bookingForm">
+            <div class="input-group">
+                <label for="bookingDate">تاريخ الحجز:</label>
+                <input type="date" id="bookingDate" required>
+            </div>
 
-        <div class="btn-group">
-            <button type="button" id="profileBtn">الملف الشخصي (Profile)</button>
-            <button type="button" id="bookingBtn" class="btn-booking">احجز الملعب</button>
-            <button type="button" id="resultBtn" class="btn-result">متابعة حالة الحجز</button>
-            <!-- الزر الرابع الجديد -->
-            <button type="button" id="chatBtn" class="btn-chat">🤖 المساعد الذكي</button>
-        </div>
+            <div class="input-group">
+                <label for="bookingDuration">مدة الحجز (عدد الساعات):</label>
+                <select id="bookingDuration" required>
+                    <option value="1" selected>ساعة واحدة (200 ج)</option>
+                    <option value="2">ساعتان (400 ج)</option>
+                    <option value="3">3 ساعات (600 ج)</option>
+                    <option value="4">4 ساعات (800 ج)</option>
+                    <option value="5">5 ساعات (1000 ج)</option>
+                    <option value="6">6 ساعات (1200 ج)</option>
+                    <option value="7">7 ساعات (1400 ج)</option>
+                    <option value="8">8 ساعات (1600 ج)</option>
+                    <option value="9">9 ساعات (1800 ج)</option>
+                    <option value="10">10 ساعات (2000 ج)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="bookingTime">وقت الحجز المتوفر:</label>
+                <select id="bookingTime" required>
+                    <option value="">يرجى اختيار التاريخ أولاً</option>
+                </select>
+            </div>
+
+            <div class="payment-section">
+                <div class="payment-title" id="paymentTitle">طريقة الدفع (رسوم الحجز: 200 ج):</div>
+                <div class="payment-options">
+                    <button type="button" class="payment-btn active" id="btnCash" onclick="setPaymentMethod('cash')">🏟️ الدفع في الملعب</button>
+                    <button type="button" class="payment-btn" id="btnInsta" onclick="setPaymentMethod('instapay')">💳 InstaPay</button>
+                </div>
+
+                <div id="instapayBox" class="instapay-box">
+                    <div class="instapay-header">
+                        <span class="instapay-logo">📱 InstaPay</span>
+                        <span style="font-size: 11px; color: #64748b;">تحويل لحظي آمن</span>
+                    </div>
+                    
+                    <div class="instapay-row">
+                        <span>رقم المحول إليه:</span>
+                        <span style="direction: ltr;">+20 12 00890168</span>
+                    </div>
+                    <div class="instapay-row">
+                        <span>المبلغ المطلوبة:</span>
+                        <span id="instapayAmountBadge" style="color: #16a34a;">200 جنيه</span>
+                    </div>
+
+                    <div style="font-size: 12px; color: #64748b; margin-top: 8px;">لتحميل تطبيق إنستاباي:</div>
+                    <div class="store-links">
+                        <a href="https://play.google.com/store/apps/details?id=com.eg.cupp.payments" target="_blank" class="store-btn">Google Play 🎮</a>
+                        <a href="https://apps.apple.com/eg/app/instapay-egypt/id1593121575" target="_blank" class="store-btn">App Store 🍏</a>
+                    </div>
+
+                    <div class="instapay-instructions">
+                        💡 <strong>تعليمات التحويل:</strong> قم بالتحويل على الرقم أعلاه، ثم اضغط على زر التأكيد أدناه وأرسل <strong>صورة إيصال التحويل (Screenshot)</strong> عبر الواتساب.
+                    </div>
+                </div>
+            </div>
+
+            <div class="notice-banner" id="noticeBanner">
+                <p>⚠️ <strong>تنبيه هام جداً:</strong></p>
+                <span id="noticeText">⏳ الدفع في الملعب خلال 24 ساعة كحد أقصى وإلا سيتم إلغاء الحجز تلقائياً وتتحرر الساعة للآخرين.</span>
+            </div>
+
+            <button type="submit" id="submitBtn" style="margin-top: 10px;">تأكيد الحجز وتوجيه للواتساب 🚀</button>
+            <button type="button" id="backBtn" class="back-btn">العودة للرئيسية</button>
+        </form>
     </div>
 
-    <!-- استدعاء مكتبات فايربيس المتوافقة -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
@@ -140,119 +329,318 @@
             measurementId: "G-YRH69L594N"
         };
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // تحديث الساعة بشكل حي
-        function updateClock() {
-            const now = new Date();
-            let hours = now.getHours();
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            const ampm = hours >= 12 ? 'مساءً' : 'صباحاً';
-            
-            hours = hours % 12;
-            hours = hours ? hours : 12; 
-            const formattedHours = String(hours).padStart(2, '0');
+        let fetchedUserName = "";
+        let fetchedUserPhone = "";
+        let userId = ""; 
+        let selectedPaymentMethod = 'cash';
+        let pricePerHour = 200;
+        let selectedDuration = 1;
+        let totalAmount = 200;
+        let currentBookedSlots = [];
 
-            const clockElement = document.getElementById("liveClock");
-            if (clockElement) {
-                clockElement.textContent = `⏰ الوقت: ${formattedHours}:${minutes}:${seconds} ${ampm}`;
-            }
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+        const allTimeSlots = [
+            "03:00 PM - 04:00 PM",
+            "04:00 PM - 05:00 PM",
+            "05:00 PM - 06:00 PM",
+            "06:00 PM - 07:00 PM",
+            "07:00 PM - 08:00 PM",
+            "08:00 PM - 09:00 PM",
+            "09:00 PM - 10:00 PM",
+            "10:00 PM - 11:00 PM",
+            "11:00 PM - 12:00 AM"
+        ];
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            const welcomeElement = document.getElementById("welcomeUser");
-            const currentDateText = document.getElementById("currentDateText");
-            const nextBookingText = document.getElementById("nextBookingText");
+        // مصفوفة تحويل الساعات لتعامل رقمي دقيق لمقارنة وقت اليوم الحالي
+        const slotHourValues = [
+            { start: 15, end: 16 }, // 03:00 PM - 04:00 PM
+            { start: 16, end: 17 }, // 04:00 PM - 05:00 PM
+            { start: 17, end: 18 }, // 05:00 PM - 06:00 PM
+            { start: 18, end: 19 }, // 06:00 PM - 07:00 PM
+            { start: 19, end: 20 }, // 07:00 PM - 08:00 PM
+            { start: 20, end: 21 }, // 08:00 PM - 09:00 PM
+            { start: 21, end: 22 }, // 09:00 PM - 10:00 PM
+            { start: 22, end: 23 }, // 10:00 PM - 11:00 PM
+            { start: 23, end: 24 }  // 11:00 PM - 12:00 AM
+        ];
 
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const todayFormatted = new Date().toLocaleDateString('ar-EG', options);
-            if (currentDateText) currentDateText.textContent = todayFormatted;
-
+        function getUserIdFromURL() {
             const urlParams = new URLSearchParams(window.location.search);
-            let currentUserId = urlParams.get("id");
+            return urlParams.get('id');
+        }
+
+        function showNoDataState() {
+            const nameElem = document.getElementById("displayUserName");
+            const phoneElem = document.getElementById("displayUserPhone");
+            
+            fetchedUserName = "";
+            fetchedUserPhone = "";
+            nameElem.innerHTML = "<span style='color:red;'>لا توجد بيانات مسجلة</span>";
+            phoneElem.innerHTML = "<span style='color:red;'>لا توجد بيانات مسجلة</span>";
+        }
+
+        async function fetchUserDataFromFirebase() {
+            const nameElem = document.getElementById("displayUserName");
+            const phoneElem = document.getElementById("displayUserPhone");
+            const urlId = getUserIdFromURL();
 
             try {
-                let userData = null;
+                if (urlId) {
+                    const docRef = await db.collection("users").doc(urlId).get();
+                    if (docRef.exists) {
+                        const data = docRef.data();
+                        if (data) {
+                            userId = docRef.id;
+                            fetchedUserName = data.userName || data.name || "";
+                            fetchedUserPhone = data.userPhone || data.phone || "";
 
-                // 1. محاولة جلب المستخدم عبر الـ id في الرابط
-                if (currentUserId) {
-                    const userDoc = await db.collection("users").doc(currentUserId).get();
-                    if (userDoc.exists) {
-                        userData = userDoc.data();
+                            nameElem.innerText = fetchedUserName || "لا توجد بيانات مسجلة";
+                            phoneElem.innerText = fetchedUserPhone || "لا توجد بيانات مسجلة";
+                            return;
+                        }
                     }
                 }
+                showNoDataState();
+            } catch (err) {
+                console.error("خطأ أثناء جلب البيانات من البيز:", err);
+                showNoDataState();
+            }
+        }
 
-                // 2. إذا لم يوجد id في الرابط أو لم يتم العثور عليه، نجلب أحدث مستخدم مسجل
-                if (!userData) {
-                    const snapshot = await db.collection("users").limit(1).get();
-                    if (!snapshot.empty) {
-                        currentUserId = snapshot.docs[0].id;
-                        userData = snapshot.docs[0].data();
-                    }
-                }
+        function setPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            const instapayBox = document.getElementById('instapayBox');
+            const btnCash = document.getElementById('btnCash');
+            const btnInsta = document.getElementById('btnInsta');
+            const noticeText = document.getElementById('noticeText');
 
-                // 3. طباعة الاسم بشكل دقيق وبحث شامل في كل الاحتمالات الممكنة للحقول
-                if (userData) {
-                    const realName = userData.name || userData.fullName || userData.userName || userData.username || userData.adminName || userData.firstName;
-                    
-                    if (realName) {
-                        welcomeElement.textContent = `أهلاً يا ${realName}`;
-                    } else {
-                        welcomeElement.textContent = `أهلاً بك`;
-                    }
-                } else {
-                    welcomeElement.textContent = "أهلاً يا صديقي";
-                }
+            if (method === 'instapay') {
+                instapayBox.style.display = 'block';
+                btnInsta.classList.add('active');
+                btnCash.classList.remove('active');
+                noticeText.innerHTML = `📸 يجب إرسال إيصال التحويل (Screenshot) مع رسالة الواتساب وإتمام الدفع خلال 24 ساعة وإلا سيتم إلغاء الحجز تلقائياً وتتحرر الساعة للآخرين.`;
+            } else {
+                instapayBox.style.display = 'none';
+                btnCash.classList.add('active');
+                btnInsta.classList.remove('active');
+                noticeText.innerHTML = `⏳ الدفع في الملعب خلال 24 ساعة كحد أقصى وإلا سيتم إلغاء الحجز تلقائياً وتتحرر الساعة للآخرين.`;
+            }
+        }
 
-                // 4. جلب الحجز الخاص بالمستخدم
-                if (currentUserId) {
-                    const bookingSnapshot = await db.collection("bookings")
-                        .where("userId", "==", currentUserId)
-                        .get();
+        function renderAvailableTimes() {
+            const timeSelect = document.getElementById("bookingTime");
+            const dateInput = document.getElementById("bookingDate");
 
-                    if (!bookingSnapshot.empty) {
-                        let bookings = [];
-                        bookingSnapshot.forEach(doc => { bookings.push(doc.data()); });
-                        const bookingData = bookings[bookings.length - 1]; // أحدث حجز
-
-                        const bDate = bookingData.date || "غير محدد";
-                        const bTime = bookingData.time || "غير محدد";
-                        const bStatus = bookingData.status || "قيد الانتظار";
-                        
-                        nextBookingText.innerHTML = `${bDate} (${bTime}) - <span style="color: ${bStatus === 'مقبول' ? '#27ae60' : '#e67e22'}">${bStatus}</span>`;
-                    } else {
-                        nextBookingText.textContent = "لا يوجد حجوزات مسجلة";
-                    }
-                }
-
-            } catch (error) {
-                console.error("خطأ في جلب البيانات: ", error);
-                welcomeElement.textContent = "أهلاً بك";
-                nextBookingText.textContent = "تعذر جلب الحجز";
+            if (!dateInput.value) {
+                timeSelect.innerHTML = '<option value="">يرجى اختيار التاريخ أولاً</option>';
+                return;
             }
 
-            // تفعيل الأزرار مع تمرير الـ id
-            document.getElementById("profileBtn").addEventListener("click", () => {
-                window.location.href = currentUserId ? `profile.html?id=${currentUserId}` : "profile.html";
+            timeSelect.innerHTML = '<option value="">اختر الوقت المناسب</option>';
+            let availableCount = 0;
+
+            // الحصول على التاريخ والوقت الحالي للمقارنة إذا كان الحجز اليوم
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            const currentHour = now.getHours();
+            const isToday = (dateInput.value === todayStr);
+
+            for (let i = 0; i < allTimeSlots.length; i++) {
+                let canBook = true;
+                
+                // منع حجز الساعات التي انقضى وقتها اليوم بالفعل
+                if (isToday) {
+                    let slotStartHour = slotHourValues[i].start;
+                    if (slotStartHour <= currentHour) {
+                        canBook = false;
+                    }
+                }
+
+                if (canBook) {
+                    if (i + selectedDuration > allTimeSlots.length) {
+                        canBook = false;
+                    } else {
+                        // التحقق إضافياً إذا كان أحد خانات المدة قد مر وقته اليوم
+                        if (isToday) {
+                            for (let j = 0; j < selectedDuration; j++) {
+                                if (slotHourValues[i + j].start <= currentHour) {
+                                    canBook = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // التحقق من الحجوزات الموجودة بقاعدة البيانات
+                        for (let j = 0; j < selectedDuration; j++) {
+                            if (currentBookedSlots.includes(allTimeSlots[i + j])) {
+                                canBook = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (canBook) {
+                    const option = document.createElement("option");
+                    option.value = i;
+                    
+                    let startStr = allTimeSlots[i].split(" - ")[0];
+                    let endStr = allTimeSlots[i + selectedDuration - 1].split(" - ")[1];
+                    
+                    option.textContent = `${startStr} - ${endStr}`;
+                    timeSelect.appendChild(option);
+                    availableCount++;
+                }
+            }
+
+            if (availableCount === 0) {
+                timeSelect.innerHTML = '<option value="">لا توجد مواعيد متاحة لهذه المدة (انقضت الساعات أو محجوزة)</option>';
+            }
+        }
+
+        async function fetchBookedSlots(selectedDate) {
+            const timeSelect = document.getElementById("bookingTime");
+            timeSelect.innerHTML = '<option value="">جاري تحميل المواعيد المتاحة...</option>';
+            
+            currentBookedSlots = [];
+
+            try {
+                const snapshot = await db.collection("bookings")
+                    .where("date", "==", selectedDate)
+                    .get();
+
+                const now = new Date();
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    
+                    if (data.status === "cancelled" || data.status === "rejected") {
+                        return; 
+                    }
+
+                    if (data.status === "pending" && data.createdAt) {
+                        const createdAtDate = data.createdAt.toDate();
+                        const hoursDifference = (now - createdAtDate) / (1000 * 60 * 60);
+
+                        if (hoursDifference > 24) {
+                            return; 
+                        }
+                    }
+
+                    if (data.slots && Array.isArray(data.slots)) {
+                        currentBookedSlots.push(...data.slots);
+                    }
+                });
+
+                renderAvailableTimes();
+            } catch (error) {
+                console.error("خطأ في جلب المواعيد المحجوزة:", error);
+                renderAvailableTimes();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchUserDataFromFirebase();
+
+            const dateInput = document.getElementById("bookingDate");
+            const durationSelect = document.getElementById("bookingDuration");
+            const bookingForm = document.getElementById("bookingForm");
+
+            // منع اختيار تواريخ سابقة من تقويم المتصفح
+            const todayStr = new Date().toISOString().split('T')[0];
+            dateInput.setAttribute('min', todayStr);
+
+            dateInput.addEventListener("change", () => {
+                const selectedDate = dateInput.value;
+                if (selectedDate) {
+                    fetchBookedSlots(selectedDate);
+                } else {
+                    renderAvailableTimes();
+                }
             });
 
-            document.getElementById("bookingBtn").addEventListener("click", () => {
-                window.location.href = currentUserId ? `حجز .html?id=${currentUserId}` : "حجز .html";
+            durationSelect.addEventListener("change", (e) => {
+                selectedDuration = parseInt(e.target.value);
+                totalAmount = selectedDuration * pricePerHour;
+                
+                document.getElementById("paymentTitle").innerText = `طريقة الدفع (رسوم الحجز: ${totalAmount} ج):`;
+                document.getElementById("instapayAmountBadge").innerText = `${totalAmount} جنيه`;
+                
+                renderAvailableTimes();
             });
 
-            document.getElementById("resultBtn").addEventListener("click", () => {
-                window.location.href = currentUserId ? `result.html?id=${currentUserId}` : "result.html";
+            bookingForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const bookingDate = dateInput.value;
+                const timeIndex = document.getElementById("bookingTime").value;
+
+                if (!bookingDate) {
+                    alert("يرجى اختيار تاريخ الحجز أولاً");
+                    return;
+                }
+
+                if (timeIndex === "") {
+                    alert("يرجى اختيار وقت الحجز المناسب");
+                    return;
+                }
+
+                const startIndex = parseInt(timeIndex);
+                let bookedSlotsArray = [];
+                for (let k = 0; k < selectedDuration; k++) {
+                    bookedSlotsArray.push(allTimeSlots[startIndex + k]);
+                }
+
+                const displayStartTime = allTimeSlots[startIndex].split(" - ")[0];
+                const displayEndTime = allTimeSlots[startIndex + selectedDuration - 1].split(" - ")[1];
+                const fullTimeDisplay = `${displayStartTime} - ${displayEndTime}`;
+
+                const paymentText = selectedPaymentMethod === 'instapay' ? 'InstaPay (يجب إرفاق الإيصال)' : 'الدفع في الملعب (خلال 24 ساعة)';
+
+                const bookingData = {
+                    userId: userId || "unknown",
+                    userName: fetchedUserName || "بدون اسم",
+                    userPhone: fetchedUserPhone || "بدون رقم",
+                    date: bookingDate,
+                    slots: bookedSlotsArray,
+                    duration: selectedDuration,
+                    totalAmount: totalAmount,
+                    paymentMethod: selectedPaymentMethod,
+                    status: "pending", 
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                try {
+                    await db.collection("bookings").add(bookingData);
+
+                    let messageText = `⚽ *طلب حجز جديد - ملعب مارجرجس* ⚽%0A%0A` +
+                                      `👤 *الاسم:* ${encodeURIComponent(fetchedUserName || 'لا توجد بيانات مسجلة')}%0A` +
+                                      `📞 *رقم الهاتف:* ${encodeURIComponent(fetchedUserPhone || 'لا توجد بيانات مسجلة')}%0A` +
+                                      `📅 *التاريخ:* ${bookingDate}%0A` +
+                                      `⏰ *الوقت:* ${encodeURIComponent(fullTimeDisplay)}%0A` +
+                                      `💳 *طريقة الدفع:* ${encodeURIComponent(paymentText)}%0A` +
+                                      `💰 *المبلغ:* ${totalAmount} جنيه%0A%0A` +
+                                      `⚠️ ملاحظة: الحجز مؤقت لمدة 24 ساعة ويشترط تأكيده.`;
+
+                    const whatsappNumber = "201200890168";
+                    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${messageText}`;
+
+                    window.open(whatsappUrl, '_blank');
+
+                    setTimeout(() => {
+                        window.location.href = `tony.html?id=${userId}`;
+                    }, 1000);
+
+                } catch (error) {
+                    console.error("خطأ أثناء حفظ الحجز في قاعدة البيانات:", error.message);
+                    alert("حدث خطأ أثناء حفظ الحجز، يرجى المحاولة مرة أخرى.");
+                }
             });
 
-            // تفعيل زر المساعد الذكي الانتقال إلى chat.html
-            document.getElementById("chatBtn").addEventListener("click", () => {
-                window.location.href = currentUserId ? `chat.html?id=${currentUserId}` : "chat.html";
+            document.getElementById("backBtn").addEventListener("click", () => {
+                window.location.href = `tony.html?id=${userId}`;
             });
         });
     </script>

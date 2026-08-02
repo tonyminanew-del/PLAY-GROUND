@@ -141,13 +141,12 @@
             setInterval(updateClock, 1000);
             updateClock(); 
 
-            // جلب بيانات الأدمن (اللقب والاسم من قاعدة البيانات)
-            const urlParams = new URLSearchParams(window.location.search);
-            let adminId = urlParams.get("id");
-
             try {
+                const urlParams = new URLSearchParams(window.location.search);
+                let adminId = urlParams.get("id");
                 let adminData = null;
 
+                // لو الرابط فيه ID هات المستند بتاعه مباشرة
                 if (adminId) {
                     const docRef = await db.collection("admins").doc(adminId).get();
                     if (docRef.exists) {
@@ -155,6 +154,7 @@
                     }
                 }
 
+                // لو مفيش ID في الرابط، هات أول مستند جوه جدول admins تلقائياً
                 if (!adminData) {
                     const snapshot = await db.collection("admins").limit(1).get();
                     if (!snapshot.empty) {
@@ -163,16 +163,18 @@
                 }
 
                 if (adminData) {
-                    const title = adminData.title || adminData.prefix || adminData.khatab || "";
-                    const name = adminData.name || adminData.fullName || adminData.userName || "المشرف";
+                    // سحب الحقول الحقيقية الموجودة في قاعدة البيانات لديك (title و username)
+                    const title = adminData.title || "";
+                    const name = adminData.username || adminData.name || "المشرف";
+                    
                     welcomeText.textContent = `أهلاً يا ${title} ${name}`.trim();
                 } else {
-                    welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
+                    welcomeText.textContent = "لا توجد بيانات مسجلة للمشرف";
                 }
 
             } catch (error) {
                 console.error("خطأ في جلب بيانات الأدمن:", error);
-                welcomeText.textContent = "أهلاً يا مشرفنا العزيز";
+                welcomeText.textContent = "خطأ في الاتصال بقاعدة البيانات";
             }
         });
     </script>

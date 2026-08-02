@@ -42,13 +42,13 @@
             background: #f8f9fa;
             border: 1px solid #e9ecef;
             border-radius: 8px;
-            padding: 10px 15px;
+            padding: 12px 15px;
             text-align: center;
             color: #2c3e50;
         }
         .user-info-card p {
             margin: 4px 0;
-            font-size: 14px;
+            font-size: 15px;
         }
         .user-info-card strong {
             color: #27ae60;
@@ -210,8 +210,8 @@
         <p class="title">حجز موعد للملعب</p>
 
         <div class="user-info-card">
-            <p id="welcomeUser">جاري التحقق من البيانات...</p>
-            <p id="userPhoneDisplay" style="display: none;">رقم الهاتف: <strong id="userPhoneVal">-</strong></p>
+            <p>الاسم: <strong id="displayUserName">جاري جلب البيانات...</strong></p>
+            <p>رقم الهاتف: <strong id="displayUserPhone">جاري جلب البيانات...</strong></p>
         </div>
         
         <form id="bookingForm">
@@ -221,14 +221,30 @@
             </div>
 
             <div class="input-group">
-                <label for="bookingTime">وقت الحجز (الساعة):</label>
+                <label for="bookingDuration">مدة الحجز (عدد الساعات):</label>
+                <select id="bookingDuration" required>
+                    <option value="1" selected>ساعة واحدة (200 ج)</option>
+                    <option value="2">ساعتان (400 ج)</option>
+                    <option value="3">3 ساعات (600 ج)</option>
+                    <option value="4">4 ساعات (800 ج)</option>
+                    <option value="5">5 ساعات (1000 ج)</option>
+                    <option value="6">6 ساعات (1200 ج)</option>
+                    <option value="7">7 ساعات (1400 ج)</option>
+                    <option value="8">8 ساعات (1600 ج)</option>
+                    <option value="9">9 ساعات (1800 ج)</option>
+                    <option value="10">10 ساعات (2000 ج)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="bookingTime">وقت الحجز المتوفر:</label>
                 <select id="bookingTime" required>
-                    <option value="">اختر التاريخ أولاً لعرض المواعيد المتاحة</option>
+                    <option value="">يرجى اختيار التاريخ أولاً</option>
                 </select>
             </div>
 
             <div class="payment-section">
-                <div class="payment-title">طريقة الدفع (رسوم الحجز: 200 ج):</div>
+                <div class="payment-title" id="paymentTitle">طريقة الدفع (رسوم الحجز: 200 ج):</div>
                 <div class="payment-options">
                     <button type="button" class="payment-btn active" id="btnCash" onclick="setPaymentMethod('cash')">🏟️ الدفع في الملعب</button>
                     <button type="button" class="payment-btn" id="btnInsta" onclick="setPaymentMethod('instapay')">💳 InstaPay</button>
@@ -239,7 +255,7 @@
                     <div class="store-links">
                         <a href="https://play.google.com/store" target="_blank" class="store-btn">Google Play Store 🎮</a>
                     </div>
-                    <p style="margin: 5px 0 0 0;">حول <strong>200 جنيه</strong> على الرقم:</p>
+                    <p style="margin: 5px 0 0 0;" id="instapayAmountText">حول <strong>200 جنيه</strong> على الرقم:</p>
                     <span class="phone-badge">+20 12 00890168</span>
 
                     <div class="notice-banner">
@@ -249,7 +265,7 @@
                 </div>
             </div>
 
-            <button type="submit" id="submitBtn" style="margin-top: 10px;">تأكيد وحجز الموعد 🚀</button>
+            <button type="submit" id="submitBtn" style="margin-top: 10px;">تأكيد الحجز وتوجيه للواتساب 🚀</button>
             <button type="button" id="backBtn" class="back-btn">العودة للرئيسية</button>
         </form>
     </div>
@@ -271,8 +287,14 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        let fetchedUserName = "";
+        let fetchedUserPhone = "";
+        let userId = ""; 
         let selectedPaymentMethod = 'cash';
-        let currentUserData = { name: '', phone: '' };
+        let pricePerHour = 200;
+        let selectedDuration = 1;
+        let totalAmount = 200;
+        let currentBookedSlots = [];
 
         const allTimeSlots = [
             "03:00 PM - 04:00 PM",
@@ -285,6 +307,37 @@
             "10:00 PM - 11:00 PM",
             "11:00 PM - 12:00 AM"
         ];
+
+        // 1. جلب البيانات من البيز
+        async function fetchUserDataFromFirebase() {
+            const nameElem = document.getElementById("displayUserName");
+            const phoneElem = document.getElementById("displayUserPhone");
+
+            try {
+                const snapshot = await db.collection("bookings")
+                    .orderBy("createdAt", "desc")
+                    .limit(1)
+                    .get();
+
+                if (!snapshot.empty) {
+                    const doc = snapshot.docs[0];
+                    const data = doc.data();
+                    userId = doc.id;
+                    fetchedUserName = data.userName || "غير محدد";
+                    fetchedUserPhone = data.userPhone || "";
+
+                    nameElem.innerText = fetchedUserName;
+                    phoneElem.innerText = fetchedUserPhone || "غير محدد";
+                } else {
+                    nameElem.innerHTML = "<span style='color:red;'>لا توجد بيانات مسجلة في البيز</span>";
+                    phoneElem.innerHTML = "<span style='color:red;'>لا توجد بيانات مسجلة في البيز</span>";
+                }
+            } catch (err) {
+                console.error("خطأ أثناء جلب البيانات من البيز:", err);
+                nameElem.innerHTML = "<span style='color:red;'>خطأ في جلب البيانات</span>";
+                phoneElem.innerHTML = "<span style='color:red;'>خطأ في جلب البيانات</span>";
+            }
+        }
 
         function setPaymentMethod(method) {
             selectedPaymentMethod = method;
@@ -303,125 +356,156 @@
             }
         }
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            let userId = urlParams.get("id");
+        // 2. تحديث قائمة الأوقات المتاحة
+        function renderAvailableTimes() {
+            const timeSelect = document.getElementById("bookingTime");
+            const dateInput = document.getElementById("bookingDate");
 
-            try {
-                if (!userId) {
-                    const latestUser = await db.collection("users")
-                        .orderBy("createdAt", "desc")
-                        .limit(1)
-                        .get();
+            if (!dateInput.value) {
+                timeSelect.innerHTML = '<option value="">يرجى اختيار التاريخ أولاً</option>';
+                return;
+            }
 
-                    if (!latestUser.empty) {
-                        userId = latestUser.docs[0].id;
+            timeSelect.innerHTML = '<option value="">اختر الوقت المناسب</option>';
+            let availableCount = 0;
+
+            for (let i = 0; i < allTimeSlots.length; i++) {
+                let canBook = true;
+                
+                if (i + selectedDuration > allTimeSlots.length) {
+                    canBook = false;
+                } else {
+                    for (let j = 0; j < selectedDuration; j++) {
+                        if (currentBookedSlots.includes(allTimeSlots[i + j])) {
+                            canBook = false;
+                            break;
+                        }
                     }
                 }
 
-                if (!userId) {
-                    alert("عفواً، لا يوجد أي مستخدم مسجل في القاعدة.");
-                    window.location.href = "user.html";
+                if (canBook) {
+                    const option = document.createElement("option");
+                    option.value = i;
+                    
+                    let startStr = allTimeSlots[i].split(" - ")[0];
+                    let endStr = allTimeSlots[i + selectedDuration - 1].split(" - ")[1];
+                    
+                    option.textContent = `${startStr} - ${endStr}`;
+                    timeSelect.appendChild(option);
+                    availableCount++;
+                }
+            }
+
+            if (availableCount === 0) {
+                timeSelect.innerHTML = '<option value="">لا توجد مواعيد متاحة لهذه المدة في هذا اليوم</option>';
+            }
+        }
+
+        // 3. جلب المواعيد المحجوزة باليوم
+        async function fetchBookedSlots(selectedDate) {
+            const timeSelect = document.getElementById("bookingTime");
+            timeSelect.innerHTML = '<option value="">جاري تحميل المواعيد المتاحة...</option>';
+            
+            currentBookedSlots = [];
+
+            try {
+                const snapshot = await db.collection("bookings")
+                    .where("date", "==", selectedDate)
+                    .where("status", "==", "confirmed") 
+                    .get();
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.slots && Array.isArray(data.slots)) {
+                        currentBookedSlots.push(...data.slots);
+                    }
+                });
+
+                renderAvailableTimes();
+            } catch (error) {
+                console.error("خطأ في جلب المواعيد المحجوزة:", error);
+                renderAvailableTimes();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchUserDataFromFirebase();
+
+            const dateInput = document.getElementById("bookingDate");
+            const durationSelect = document.getElementById("bookingDuration");
+            const bookingForm = document.getElementById("bookingForm");
+
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.setAttribute('min', today);
+
+            const handleDateChange = () => {
+                const selectedDate = dateInput.value;
+                if (selectedDate) {
+                    fetchBookedSlots(selectedDate);
+                } else {
+                    renderAvailableTimes();
+                }
+            };
+
+            dateInput.addEventListener("change", handleDateChange);
+            dateInput.addEventListener("input", handleDateChange);
+
+            durationSelect.addEventListener("change", (e) => {
+                selectedDuration = parseInt(e.target.value);
+                totalAmount = selectedDuration * pricePerHour;
+                
+                document.getElementById("paymentTitle").innerText = `طريقة الدفع (رسوم الحجز: ${totalAmount} ج):`;
+                document.getElementById("instapayAmountText").innerHTML = `حول <strong>${totalAmount} جنيه</strong> على الرقم:`;
+                
+                renderAvailableTimes();
+            });
+
+            // 4. كتابة الرسالة كما بالنموذج المطلوب وتمريرها مباشرة عبر wa.me
+            bookingForm.addEventListener("submit", (e) => {
+                e.preventDefault();
+
+                const bookingDate = dateInput.value;
+                const timeIndex = document.getElementById("bookingTime").value;
+
+                if (!bookingDate) {
+                    alert("يرجى اختيار تاريخ الحجز أولاً");
                     return;
                 }
 
-                const userDoc = await db.collection("users").doc(userId).get();
-                if (userDoc.exists) {
-                    const userData = userDoc.data();
-                    currentUserData.name = userData.name || userData.username || 'مستخدم';
-                    currentUserData.phone = userData.phone || 'غير مسجل';
-
-                    document.getElementById("welcomeUser").innerHTML = `أهلاً بك يا <strong>${currentUserData.name}</strong>`;
-                    document.getElementById("userPhoneVal").textContent = currentUserData.phone;
-                    document.getElementById("userPhoneDisplay").style.display = "block";
+                if (timeIndex === "") {
+                    alert("يرجى اختيار وقت الحجز المناسب");
+                    return;
                 }
 
-                const dateInput = document.getElementById("bookingDate");
-                const timeSelect = document.getElementById("bookingTime");
+                const startIndex = parseInt(timeIndex);
+                const displayStartTime = allTimeSlots[startIndex].split(" - ")[0];
+                const displayEndTime = allTimeSlots[startIndex + selectedDuration - 1].split(" - ")[1];
+                const fullTimeDisplay = `${displayStartTime} - ${displayEndTime}`;
 
-                dateInput.addEventListener("change", async () => {
-                    const selectedDate = dateInput.value;
-                    timeSelect.innerHTML = '<option value="">جاري تحميل المواعيد المتاحة...</option>';
+                const paymentText = selectedPaymentMethod === 'instapay' ? 'InstaPay' : 'الدفع في الملعب';
 
-                    const snapshot = await db.collection("bookings").where("date", "==", selectedDate).get();
-                    let bookedSlots = [];
-                    snapshot.forEach(doc => {
-                        bookedSlots.push(doc.data().time);
-                    });
+                let messageText = `⚽ *حجز جديد - ملعب مارجرجس* ⚽%0A%0A` +
+                                  `👤 *الاسم:* ${encodeURIComponent(fetchedUserName || 'غير محدد')}%0A` +
+                                  `📞 *رقم الهاتف:* ${encodeURIComponent(fetchedUserPhone || 'غير محدد')}%0A` +
+                                  `📅 *التاريخ:* ${bookingDate}%0A` +
+                                  `⏰ *الوقت:* ${encodeURIComponent(fullTimeDisplay)}%0A` +
+                                  `💳 *طريقة الدفع:* ${encodeURIComponent(paymentText)}%0A` +
+                                  `💰 *المبلغ:* ${totalAmount} جنيه`;
 
-                    timeSelect.innerHTML = '<option value="">اختر الوقت المناسب</option>';
-                    
-                    allTimeSlots.forEach(slot => {
-                        if (!bookedSlots.includes(slot)) {
-                            const option = document.createElement("option");
-                            option.value = slot;
-                            option.textContent = slot;
-                            timeSelect.appendChild(option);
-                        }
-                    });
+                const whatsappNumber = "201200890168";
+                const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${messageText}`;
 
-                    if (timeSelect.options.length <= 1) {
-                        timeSelect.innerHTML = '<option value="">عفواً، جميع المواعيد محجوزة في هذا اليوم</option>';
-                    }
-                });
+                window.open(whatsappUrl, '_blank');
 
-                const bookingForm = document.getElementById("bookingForm");
-                const submitBtn = document.getElementById("submitBtn");
-                
-                bookingForm.addEventListener("submit", async (e) => {
-                    e.preventDefault();
-                    const date = dateInput.value;
-                    const time = timeSelect.value;
-
-                    if (!date || !time) {
-                        alert("يرجى اختيار التاريخ والوقت بشكل صحيح!");
-                        return;
-                    }
-
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = "جاري الحفظ والتحويل...";
-
-                    await db.collection("bookings").add({
-                        userId: userId,
-                        userName: currentUserData.name,
-                        userPhone: currentUserData.phone,
-                        date: date,
-                        time: time,
-                        paymentMethod: selectedPaymentMethod,
-                        amount: 200,
-                        createdAt: new Date()
-                    });
-
-                    const paymentText = selectedPaymentMethod === 'instapay' ? 'InstaPay' : 'الدفع في الملعب';
-                    
-                    let messageText = `⚽ *حجز جديد - ملعب مارجرجس* ⚽%0A%0A` +
-                                      `👤 *الاسم:* ${encodeURIComponent(currentUserData.name)}%0A` +
-                                      `📞 *رقم الهاتف:* ${encodeURIComponent(currentUserData.phone)}%0A` +
-                                      `📅 *التاريخ:* ${date}%0A` +
-                                      `⏰ *الوقت:* ${encodeURIComponent(time)}%0A` +
-                                      `💳 *طريقة الدفع:* ${encodeURIComponent(paymentText)}%0A` +
-                                      `💰 *المبلغ:* 200 جنيه`;
-
-                    const whatsappNumber = "201200890168";
-                    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${messageText}`;
-
-                    window.open(whatsappUrl, '_blank');
-
-                    setTimeout(() => {
-                        window.location.href = `tony.html?id=${userId}`;
-                    }, 1000);
-                });
-
-                document.getElementById("backBtn").addEventListener("click", () => {
+                setTimeout(() => {
                     window.location.href = `tony.html?id=${userId}`;
-                });
+                }, 1000);
+            });
 
-            } catch (error) {
-                console.error("خطأ في الاتصال بقاعدة البيانات:", error);
-                alert("حدث خطأ، يرجى المحاولة مرة أخرى.");
-                submitBtn.disabled = false;
-                submitBtn.textContent = "تأكيد وحجز الموعد 🚀";
-            }
+            // زر العودة
+            document.getElementById("backBtn").addEventListener("click", () => {
+                window.location.href = `tony.html?id=${userId}`;
+            });
         });
     </script>
 </body>

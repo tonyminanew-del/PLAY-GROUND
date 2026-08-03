@@ -228,7 +228,7 @@
                 }
 
                 if (match) {
-                    let clientName = data.name || data.userName || "بدون اسم";
+                    let clientName = data.userName || data.name || "بدون اسم";
 
                     if (data.userId && clientName === "بدون اسم") {
                         try {
@@ -245,9 +245,13 @@
                     }
 
                     data.resolvedName = clientName;
-                    loadedBookingsData[docId] = data;
 
-                    const amount = Number(data.amount) || 0;
+                    // جلب القيمة من الحقل الصحيح الموجود في قاعدة البيانات لديك (totalAmount)
+                    const rawAmount = data.totalAmount ?? data.amount ?? data.price ?? data.total ?? 0;
+                    const amount = Number(rawAmount) || 0;
+                    data.resolvedAmount = amount;
+
+                    loadedBookingsData[docId] = data;
                     
                     if (type !== 'basket') {
                         total += amount;
@@ -281,6 +285,7 @@
         if (!data) return;
 
         const isRejected = (data.status && (String(data.status).toLowerCase().includes('مرفوض') || String(data.status).toLowerCase() === 'rejected'));
+        const displayAmountValue = isRejected ? '0 (غير محسوب)' : (data.resolvedAmount || 0) + ' جنيه';
 
         let html = `
             <div class="info-group">
@@ -292,29 +297,13 @@
             <div class="info-group">
                 <h4>بيانات الحجز:</h4>
                 <p><strong>التاريخ:</strong> ${data.date || '-'}</p>
-                ${!isRejected ? `<p><strong>الوقت:</strong> ${data.time || '-'}</p>` : ''}
-                <p><strong>المبلغ المدفوع:</strong> ${isRejected ? '0 (غير محسوب)' : (data.amount || 0) + ' جنيه'}</p>
+                ${!isRejected ? `<p><strong>مدة الحجز:</strong> ${data.duration || '-'} ساعات</p>` : ''}
+                <p><strong>المبلغ المدفوع:</strong> ${displayAmountValue}</p>
                 ${!isRejected ? `<p><strong>طريقة الدفع:</strong> ${data.paymentMethod || '-'}</p>` : ''}
-                <p><strong>الحالة:</strong> <span style="color:red; font-weight:bold;">${data.status || 'مرفوض'}</span></p>
+                <p><strong>الحالة:</strong> <span style="color:green; font-weight:bold;">${data.status || 'نشط'}</span></p>
                 ${data.createdAt ? `<p><strong>وقت الإنشاء:</strong> ${data.createdAt.toDate ? data.createdAt.toDate().toLocaleString('ar-EG') : data.createdAt}</p>` : ''}
             </div>
         `;
-
-        let otherFields = '';
-        for (const [key, value] of Object.entries(data)) {
-            if (!['userId', 'name', 'userName', 'date', 'time', 'amount', 'paymentMethod', 'createdAt', 'resolvedName', 'userFetchedData', 'userPhone', 'status'].includes(key)) {
-                otherFields += `<p><strong>${key}:</strong> ${value}</p>`;
-            }
-        }
-
-        if (otherFields) {
-            html += `
-                <div class="info-group">
-                    <h4>بيانات أخرى:</h4>
-                    ${otherFields}
-                </div>
-            `;
-        }
 
         document.getElementById('modalBody').innerHTML = html;
         document.getElementById('detailsModal').style.display = 'flex';
@@ -325,7 +314,6 @@
     }
 
     window.onload = () => {
-        // تعيين الشهر الحالي تلقائياً عند الفتح
         const now = new Date();
         const yr = now.getFullYear();
         const mo = (now.getMonth() + 1).toString().padStart(2, '0');

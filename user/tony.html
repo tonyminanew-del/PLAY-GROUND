@@ -93,13 +93,7 @@
         .btn-result:hover {
             background-color: #d35400;
         }
-        .btn-chat {
-            background-color: #8e44ad;
-        }
-        .btn-chat:hover {
-            background-color: #732d91;
-        }
-        /* زر الحجوزات السابقة الجديد بتصميم مميز */
+        /* زر الحجوزات السابقة بتصميم مميز */
         .btn-history {
             background-color: #34495e;
         }
@@ -121,11 +115,10 @@
         </div>
 
         <div class="btn-group">
-            <button type="button" id="profileBtn">الملف الشخصي (Profile)</button>
+            <button type="button" id="profileBtn">الملف الشخصي </button>
             <button type="button" id="bookingBtn" class="btn-booking">احجز الملعب</button>
             <button type="button" id="resultBtn" class="btn-result">متابعة حالة الحجز</button>
             <button type="button" id="historyBtn" class="btn-history">📁 السجل والحجوزات السابقة</button>
-            <button type="button" id="chatBtn" class="btn-chat">🤖 المساعد الذكي</button>
         </div>
     </div>
 
@@ -279,10 +272,6 @@
 
             document.getElementById("historyBtn").addEventListener("click", () => {
                 window.location.href = currentUserId ? `n.html?id=${currentUserId}` : "n.html";
-            });
-
-            document.getElementById("chatBtn").addEventListener("click", () => {
-                window.location.href = currentUserId ? `chat.html?id=${currentUserId}` : "chat.html";
             });
         });
     </script>

@@ -80,9 +80,6 @@
         
         .btn-money { background-color: #16a085; }
         .btn-money:hover { background-color: #138d75; }
-
-        .btn-ai { background-color: #d35400; }
-        .btn-ai:hover { background-color: #ba4a00; }
     </style>
 </head>
 <body>
@@ -95,10 +92,9 @@
     </div> 
 
     <div class="admin-card">
-        <button type="button" class="btn-management" onclick="location.href='managment.html'">إدارة الحجوزات ⚙️</button>
-        <button type="button" class="btn-money" onclick="location.href='money.html'">التقارير المالية 📊</button>
-        <button type="button" class="btn-ai" onclick="location.href='ai.html'">🤖 المساعد الذكي (AI)</button>
-        <button type="button" class="btn-profile" onclick="location.href='profile.html'">الملف الشخصي 👤</button>
+        <button type="button" class="btn-management" id="managementBtn">إدارة الحجوزات ⚙️</button>
+        <button type="button" class="btn-money" id="moneyBtn">التقارير المالية 📊</button>
+        <button type="button" class="btn-profile" id="profileBtn">الملف الشخصي 👤</button>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -141,9 +137,10 @@
             setInterval(updateClock, 1000);
             updateClock(); 
 
+            let queryParamsStr = window.location.search;
+
             try {
-                // جلب الـ ID أو اسم المستخدم المسجل دخوله من الـ localStorage أو الرابط
-                const urlParams = new URLSearchParams(window.location.search);
+                const urlParams = new URLSearchParams(queryParamsStr);
                 let adminId = urlParams.get("id") || localStorage.getItem("adminId");
                 let currentUsername = urlParams.get("username") || localStorage.getItem("adminUsername");
 
@@ -154,7 +151,6 @@
 
                 let adminData = null;
 
-                // إذا كان الـ ID متوفراً، قم بجلبه مباشرةً بدقة من قاعدة البيانات
                 if (adminId) {
                     const docSnap = await db.collection("admins").doc(adminId).get();
                     if (docSnap.exists) {
@@ -162,7 +158,6 @@
                     }
                 }
 
-                // لو لم يجد بالـ ID، ابحث بالـ username
                 if (!adminData && currentUsername) {
                     const snapshot = await db.collection("admins")
                         .where("username", "==", currentUsername)
@@ -173,7 +168,6 @@
                     }
                 }
 
-                // عرض النتيجة للمستخدم
                 if (adminData) {
                     const title = adminData.title || ""; 
                     const username = adminData.username || "المشرف";
@@ -186,6 +180,19 @@
                 console.error("خطأ في جلب بيانات الأدمن:", error);
                 welcomeText.textContent = "خطأ في الاتصال بقاعدة البيانات";
             }
+
+            // ربط الأزرار بالحفاظ على تمرير البيانات (Query Parameters) بين الصفحات
+            document.getElementById("managementBtn").addEventListener("click", () => {
+                window.location.href = `managment.html${queryParamsStr}`;
+            });
+
+            document.getElementById("moneyBtn").addEventListener("click", () => {
+                window.location.href = `money.html${queryParamsStr}`;
+            });
+
+            document.getElementById("profileBtn").addEventListener("click", () => {
+                window.location.href = `profile.html${queryParamsStr}`;
+            });
         });
     </script>
 </body>
